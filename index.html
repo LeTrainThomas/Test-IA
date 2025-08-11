@@ -2,345 +2,261 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <title>Finger Chooser</title>
+  <title>Chooser — Mobile</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
+    /* --- Page full-screen, iPhone ready --- */
     html, body {
       height: 100%;
       margin: 0;
-      padding: 0;
-      background: #0c0c0f;
-      color: #eaeaf2;
-      font-family: -apple-system, system-ui, "SF Pro Text", Inter, Roboto, Arial, sans-serif;
-      overscroll-behavior: none;        /* évite le rebond */
-      -webkit-user-select: none;
-      user-select: none;
-      touch-action: none;               /* iOS: on gère tout au JS, pas de scroll/zoom */
-    }
-
-    #app {
-      position: fixed;
-      inset: 0;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-    }
-
-    /* Bandeau d'infos */
-    #hud {
-      padding: env(safe-area-inset-top) 12px 8px 12px;
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      justify-content: space-between;
-      background: linear-gradient(180deg, rgba(255,255,255,0.06), transparent);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-    }
-    #title {
-      font-weight: 600;
-      letter-spacing: 0.2px;
-      opacity: 0.9;
-    }
-    #controls {
-      display: flex;
-      gap: 8px;
-    }
-    .btn {
-      appearance: none;
-      border: 0;
-      border-radius: 12px;
-      padding: 10px 14px;
-      background: #1c1c23;
-      color: #eaeaf2;
-      font-size: 15px;
-      line-height: 1;
-    }
-    .btn:active { transform: scale(0.98); }
-
-    /* Zone de jeu */
-    #stage {
-      position: relative;
-      overflow: hidden;
+      background: radial-gradient(1200px 800px at 20% 10%, #0d1324, #070b16 55%) fixed,
+                  linear-gradient(135deg, #101a3a 0%, #0a0f22 100%) fixed;
+      overscroll-behavior: none;
+      -webkit-user-select: none; user-select: none;
       touch-action: none;
+      cursor: default;
+    }
+    #stage {
+      position: fixed; inset: 0;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right)
+               env(safe-area-inset-bottom) env(safe-area-inset-left);
+      overflow: hidden;
     }
 
-    /* Message central */
-    #hint {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%,-50%);
-      text-align: center;
-      font-size: 16px;
-      line-height: 1.4;
-      color: #cfcfe5;
-      opacity: 0.9;
-      pointer-events: none;
-      padding: 0 16px;
-    }
-    #hint small { opacity: 0.7; display: block; margin-top: 6px; }
-
-    /* Marqueurs de doigts */
+    /* --- Marqueur de doigt : fort contraste --- */
     .finger {
       position: absolute;
-      width: 68px;
-      height: 68px;
-      margin-left: -34px;   /* centre sur le point */
-      margin-top: -34px;
+      width: 76px; height: 76px;
+      margin-left: -38px; margin-top: -38px;
       border-radius: 999px;
-      background: radial-gradient(closest-side, rgba(140,170,255,0.25), rgba(140,170,255,0.05));
-      border: 2px solid rgba(140,170,255,0.5);
-      box-shadow: 0 0 0 6px rgba(140,170,255,0.06), 0 10px 30px rgba(0,0,0,0.35);
-      transition: transform 120ms ease, opacity 160ms ease, border-color 160ms ease;
-      will-change: transform, opacity;
-    }
-    .finger[data-state="moving"] {
-      transform: scale(0.92);
-      border-color: rgba(255,180,120,0.7);
-    }
-
-    /* Gagnant: pulsation + anneau */
-    .finger.winner {
-      background: radial-gradient(closest-side, rgba(120,255,180,0.28), rgba(120,255,180,0.06));
-      border-color: rgba(120,255,180,0.9);
+      background: radial-gradient(closest-side, rgba(46,162,255,0.35), rgba(46,162,255,0.07));
+      border: 3px solid rgba(120,190,255,0.95);
       box-shadow:
-        0 0 0 10px rgba(120,255,180,0.10),
-        0 0 0 24px rgba(120,255,180,0.06),
-        0 18px 45px rgba(0,0,0,0.45);
-      animation: pulse 900ms ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50%      { transform: scale(1.08); }
+        0 0 0 10px rgba(46,162,255,0.15),
+        0 0 42px rgba(46,162,255,0.55),
+        0 18px 48px rgba(0,0,0,0.6);
+      transition: opacity 220ms ease, transform 180ms ease, box-shadow 220ms ease, border-color 220ms ease, background 220ms ease;
+      will-change: transform, opacity;
+      opacity: 0.98;
     }
 
-    /* Bandeau bas */
-    #footer {
-      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      background: linear-gradient(0deg, rgba(255,255,255,0.06), transparent);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
+    /* --- Pulsation lente, synchronisée --- */
+    .pulse {
+      animation: pulse 1600ms ease-in-out infinite;
     }
-    #status {
-      font-size: 14px;
-      opacity: 0.8;
+    /* phase de “pré-sélection” : plus ample (toujours synchrone) */
+    .preselect {
+      animation: pulse-strong 1000ms ease-in-out infinite;
     }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow:
+          0 0 0 10px rgba(46,162,255,0.15),
+          0 0 42px rgba(46,162,255,0.55),
+          0 18px 48px rgba(0,0,0,0.6); }
+      50%      { transform: scale(1.06); box-shadow:
+          0 0 0 16px rgba(46,162,255,0.22),
+          0 0 64px rgba(46,162,255,0.80),
+          0 26px 64px rgba(0,0,0,0.65); }
+    }
+    @keyframes pulse-strong {
+      0%, 100% { transform: scale(1.02); box-shadow:
+          0 0 0 14px rgba(46,162,255,0.22),
+          0 0 72px rgba(46,162,255,0.95),
+          0 28px 70px rgba(0,0,0,0.66); }
+      50%      { transform: scale(1.12); box-shadow:
+          0 0 0 22px rgba(46,162,255,0.30),
+          0 0 110px rgba(46,162,255,1),
+          0 36px 90px rgba(0,0,0,0.7); }
+    }
+
+    /* --- Gagnant : aura blanche nette, pas de pulsation --- */
+    .winner {
+      background: radial-gradient(closest-side, rgba(255,255,255,0.70), rgba(255,255,255,0.10));
+      border-color: #ffffff;
+      box-shadow:
+        0 0 0 18px rgba(255,255,255,0.30),
+        0 0 120px rgba(255,255,255,0.95),
+        0 24px 80px rgba(0,0,0,0.75);
+      animation: none !important;
+      transform: scale(1.06);
+    }
+
+    /* --- Perdants : s’éteignent doucement --- */
+    .loser { opacity: 0.18; animation: none !important; }
+
+    /* petite réduction visuelle si mouvement important */
+    .moving { transform: scale(0.94); }
   </style>
 </head>
 <body>
-  <div id="app">
-    <div id="hud">
-      <div id="title">Finger Chooser</div>
-      <div id="controls">
-        <button class="btn" id="resetBtn" title="Réinitialiser">Encore</button>
-      </div>
-    </div>
-
-    <div id="stage">
-      <div id="hint">
-        Posez <b>au moins deux doigts</b> sur l’écran<br>
-        puis ne bougez plus ~½ seconde.<br>
-        <small>Un des doigts sera choisi aléatoirement.</small>
-      </div>
-    </div>
-
-    <div id="footer">
-      <div id="status">Prêt</div>
-    </div>
-  </div>
+  <div id="stage"></div>
 
   <script>
     (() => {
-      const MIN_TOUCHES = 2;           // minimum de doigts pour tirer au sort
-      const STABLE_MS = 550;           // durée de stabilisation requise
-      const MOVE_TOL = 12;             // tolérance de mouvement (px)
-      const MAX_MARKER_DISTANCE = 300; // anti-saut lors d’un recalc d’offset (sécurité UI)
+      // --- Paramètres (simple et fixes) ---
+      const WAIT_MS = 3500;        // ~3,5 s d'attente
+      const PRESELECT_MS = 1000;   // “gonflement” avant tirage
+      const MOVE_TOL = 14;         // tolérance mouvement (px)
+      const MIN_TOUCHES = 2;       // on ne tire qu'à partir de 2 doigts
 
       const stage = document.getElementById('stage');
-      const hint = document.getElementById('hint');
-      const statusEl = document.getElementById('status');
-      const resetBtn = document.getElementById('resetBtn');
 
-      const touches = new Map(); // id -> {x,y,ox,oy, moved:boolean, el:HTMLElement}
-      let phase = 'idle';        // 'idle' | 'collecting' | 'selected'
-      let stableTimer = null;
-      let winnerId = null;
+      // touches: id -> {x,y,ox,oy,el,moved}
+      const touches = new Map();
+      let phase = 'idle';          // idle | waiting | preselect | selected
+      let waitTimer = null;
+      let preTimer = null;
 
-      // Empêche safari de faire défiler/zoomer
+      // Empêche scroll / zoom sur iOS
       ['touchstart','touchmove','touchend','touchcancel','gesturestart'].forEach(ev =>
-        document.addEventListener(ev, (e) => e.preventDefault(), { passive: false })
+        document.addEventListener(ev, e => e.preventDefault(), { passive: false })
       );
 
-      // Helpers UI
-      const setStatus = (txt) => statusEl.textContent = txt;
-      const showHint = (show) => hint.style.display = show ? 'block' : 'none';
-
-      function upsertFinger(id, x, y) {
-        let obj = touches.get(id);
-        if (!obj) {
-          const el = document.createElement('div');
-          el.className = 'finger';
-          el.dataset.id = id;
-          stage.appendChild(el);
-          obj = { x, y, ox: x, oy: y, moved: false, el };
-          touches.set(id, obj);
-        } else {
-          const dx = Math.abs(x - obj.ox);
-          const dy = Math.abs(y - obj.oy);
-          const dist = Math.hypot(dx, dy);
-          if (dist > MOVE_TOL) obj.moved = true;
-          // si énorme saut (rotation d’écran / resize), on ré-initialise l’origine pour éviter faux "moved"
-          if (dist > MAX_MARKER_DISTANCE) { obj.ox = x; obj.oy = y; }
-          obj.x = x; obj.y = y;
-        }
-        // placer l’élément
-        obj.el.style.left = `${obj.x}px`;
-        obj.el.style.top  = `${obj.y}px`;
-        obj.el.dataset.state = obj.moved ? 'moving' : 'still';
-        return obj;
+      function resetAllAnimationsSync() {
+        // Pour synchroniser les pulsations: on retire/ajoute la classe .pulse
+        // simultanément sur TOUS les marqueurs (reset d’animation)
+        const els = [...touches.values()].map(t => t.el);
+        els.forEach(el => { el.classList.remove('pulse','preselect'); void el.offsetWidth; });
+        els.forEach(el => el.classList.add('pulse'));
       }
 
-      function removeFinger(id) {
-        const obj = touches.get(id);
-        if (obj) {
-          obj.el.style.opacity = '0';
-          setTimeout(() => obj.el.remove(), 150);
-          touches.delete(id);
-        }
-      }
+      function enterWaiting() {
+        clearTimers();
+        if (touches.size === 0) return enterIdle();
 
-      function clearAllFingers() {
-        touches.forEach(t => t.el.remove());
-        touches.clear();
-      }
-
-      function cancelStableTimer() {
-        if (stableTimer) { clearTimeout(stableTimer); stableTimer = null; }
-      }
-
-      function maybeStartStableWindow() {
-        cancelStableTimer();
-        if (phase !== 'collecting') return;
-        if (touches.size < MIN_TOUCHES) return;
-        // si un doigt bouge, on repousse la fenêtre
-        if ([...touches.values()].some(t => t.moved)) return;
-
-        stableTimer = setTimeout(() => {
-          // recheck immobility
-          if (phase === 'collecting' &&
-              touches.size >= MIN_TOUCHES &&
-              ![...touches.values()].some(t => t.moved)) {
-            selectRandom();
-          }
-        }, STABLE_MS);
-      }
-
-      function selectRandom() {
-        const ids = [...touches.keys()];
-        if (ids.length < MIN_TOUCHES) return;
-
-        // tirage uniforme
-        const idx = Math.floor(Math.random() * ids.length);
-        winnerId = ids[idx];
-
-        touches.forEach((t, id) => {
-          t.el.classList.toggle('winner', id === winnerId);
+        phase = 'waiting';
+        // Tous les marqueurs en mode pulse lent, synchronisé
+        touches.forEach(t => {
+          t.el.classList.remove('winner','loser','preselect');
+          t.el.classList.add('pulse');
+          t.moved = false; t.ox = t.x; t.oy = t.y;
         });
+        resetAllAnimationsSync();
+        waitTimer = setTimeout(beginPreselect, WAIT_MS);
+      }
+
+      function beginPreselect() {
+        if (phase !== 'waiting') return;
+        if (touches.size < MIN_TOUCHES) { enterIdle(); return; }
+
+        phase = 'preselect';
+        // renforce l'animation, de manière synchrone
+        touches.forEach(t => t.el.classList.remove('pulse'));
+        // synchro : même astuce
+        const els = [...touches.values()].map(t => t.el);
+        els.forEach(el => { el.classList.remove('preselect'); void el.offsetWidth; });
+        els.forEach(el => el.classList.add('preselect'));
+
+        preTimer = setTimeout(selectWinner, PRESELECT_MS);
+      }
+
+      function selectWinner() {
+        if (phase !== 'preselect') return;
+        if (touches.size < MIN_TOUCHES) { enterIdle(); return; }
 
         phase = 'selected';
-        setStatus('Gagnant choisi ! Levez les doigts ou touchez « Encore ».');
-        showHint(false);
-        // haptics (iOS WebKit ne supporte pas vibrate, on se contente de l’anim visuelle)
+        const ids = [...touches.keys()];
+        const idx = Math.floor(Math.random() * ids.length);
+        const winnerId = ids[idx];
+
+        touches.forEach((t, id) => {
+          t.el.classList.remove('pulse','preselect','moving');
+          if (id === winnerId) {
+            t.el.classList.remove('loser');
+            t.el.classList.add('winner');
+          } else {
+            t.el.classList.add('loser');
+          }
+        });
       }
 
-      function toCollecting() {
-        if (phase !== 'collecting') {
-          phase = 'collecting';
-          winnerId = null;
-          setStatus('Ne bougez plus…');
-          showHint(false);
-        }
-        maybeStartStableWindow();
-      }
-
-      function toIdle() {
+      function enterIdle() {
+        clearTimers();
+        touches.forEach(t => t.el.remove());
+        touches.clear();
         phase = 'idle';
-        winnerId = null;
-        cancelStableTimer();
-        clearAllFingers();
-        setStatus('Prêt');
-        showHint(true);
       }
 
-      // Événements tactiles
-      stage.addEventListener('touchstart', (e) => {
+      function clearTimers() {
+        if (waitTimer) { clearTimeout(waitTimer); waitTimer = null; }
+        if (preTimer)  { clearTimeout(preTimer);  preTimer  = null; }
+      }
+
+      function upsertFinger(id, x, y) {
+        let o = touches.get(id);
+        if (!o) {
+          const el = document.createElement('div');
+          el.className = 'finger';
+          stage.appendChild(el);
+          o = { x, y, ox: x, oy: y, moved: false, el };
+          touches.set(id, o);
+        } else {
+          const dx = Math.abs(x - o.ox), dy = Math.abs(y - o.oy);
+          if (Math.hypot(dx, dy) > MOVE_TOL) o.moved = true;
+          o.x = x; o.y = y;
+        }
+        o.el.style.left = `${o.x}px`;
+        o.el.style.top  = `${o.y}px`;
+        o.el.classList.toggle('moving', o.moved);
+        return o;
+      }
+      function removeFinger(id) {
+        const o = touches.get(id);
+        if (!o) return;
+        o.el.remove(); touches.delete(id);
+      }
+
+      // --- Événements tactiles ---
+      stage.addEventListener('touchstart', e => {
         for (const t of e.changedTouches) {
           upsertFinger(t.identifier, t.clientX, t.clientY);
         }
-        if (touches.size >= MIN_TOUCHES && phase !== 'selected') {
-          toCollecting();
-        }
+        // Toute nouvelle arrivée réinitialise l'attente + resynchronise
         if (phase === 'selected') {
-          // si on retouche pendant l’état "selected", on ignore (on attend reset ou Encore)
-        } else {
-          maybeStartStableWindow();
+          // on attend que tout le monde lève : on ignore les nouveaux doigts
+          return;
         }
+        enterWaiting();
       }, { passive: false });
 
-      stage.addEventListener('touchmove', (e) => {
+      stage.addEventListener('touchmove', e => {
         for (const t of e.changedTouches) {
           if (!touches.has(t.identifier)) continue;
           upsertFinger(t.identifier, t.clientX, t.clientY);
         }
-        if (phase === 'collecting') {
-          // mouvement => repousse la fenêtre de stabilisation
-          maybeStartStableWindow();
-        }
+        // si ça bouge pendant l'attente/préselect → on relance proprement
+        if (phase === 'waiting' || phase === 'preselect') enterWaiting();
       }, { passive: false });
 
-      function handleEndLike(e) {
-        for (const t of e.changedTouches) {
-          removeFinger(t.identifier);
-        }
-        if (phase === 'collecting') {
-          cancelStableTimer();
-          if (touches.size >= MIN_TOUCHES) {
-            // relance une fenêtre si encore assez de doigts
-            // (ex: un doigt se lève puis revient)
-            maybeStartStableWindow();
+      function endLike(e) {
+        for (const t of e.changedTouches) removeFinger(t.identifier);
+
+        if (phase === 'selected') {
+          // quand tout le monde lève → reset complet
+          if (touches.size === 0) enterIdle();
+        } else if (phase === 'waiting' || phase === 'preselect') {
+          if (touches.size >= 1) {
+            // Un seul doigt = on reste en attente jusqu'à ce qu'un autre arrive,
+            // mais on relance l'horloge de 3,5 s à chaque changement
+            enterWaiting();
           } else {
-            // pas assez de doigts → retour idle
-            toIdle();
+            enterIdle();
           }
-        } else if (phase === 'selected') {
-          if (touches.size === 0) {
-            // Tous les doigts levés → prêt pour un nouveau tour
-            toIdle();
-          }
-        } else {
-          if (touches.size === 0) toIdle();
+        } else if (touches.size === 0) {
+          enterIdle();
         }
       }
-      stage.addEventListener('touchend', handleEndLike, { passive: false });
-      stage.addEventListener('touchcancel', handleEndLike, { passive: false });
+      stage.addEventListener('touchend', endLike, { passive: false });
+      stage.addEventListener('touchcancel', endLike, { passive: false });
 
-      // Bouton Encore (reset)
-      resetBtn.addEventListener('click', () => {
-        toIdle();
-      });
+      // Réinitialise en cas de rotation
+      window.addEventListener('orientationchange', () => setTimeout(enterIdle, 120));
 
-      // Sécurité: reset si orientation change
-      window.addEventListener('orientationchange', () => {
-        setTimeout(toIdle, 120);
-      });
-
-      // Premier état
-      toIdle();
+      // Démarrage
+      enterIdle();
     })();
   </script>
 </body>
