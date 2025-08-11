@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Finger Chooser</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #0c0c0f;
+      color: #eaeaf2;
+      font-family: -apple-system, system-ui, "SF Pro Text", Inter, Roboto, Arial, sans-serif;
+      overscroll-behavior: none;        /* évite le rebond */
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: none;               /* iOS: on gère tout au JS, pas de scroll/zoom */
+    }
+
+    #app {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    /* Bandeau d'infos */
+    #hud {
+      padding: env(safe-area-inset-top) 12px 8px 12px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), transparent);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    #title {
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      opacity: 0.9;
+    }
+    #controls {
+      display: flex;
+      gap: 8px;
+    }
+    .btn {
+      appearance: none;
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 14px;
+      background: #1c1c23;
+      color: #eaeaf2;
+      font-size: 15px;
+      line-height: 1;
+    }
+    .btn:active { transform: scale(0.98); }
+
+    /* Zone de jeu */
+    #stage {
+      position: relative;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    /* Message central */
+    #hint {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%,-50%);
+      text-align: center;
+      font-size: 16px;
+      line-height: 1.4;
+      color: #cfcfe5;
+      opacity: 0.9;
+      pointer-events: none;
+      padding: 0 16px;
+    }
+    #hint small { opacity: 0.7; display: block; margin-top: 6px; }
+
+    /* Marqueurs de doigts */
+    .finger {
+      position: absolute;
+      width: 68px;
+      height: 68px;
+      margin-left: -34px;   /* centre sur le point */
+      margin-top: -34px;
+      border-radius: 999px;
+      background: radial-gradient(closest-side, rgba(140,170,255,0.25), rgba(140,170,255,0.05));
+      border: 2px solid rgba(140,170,255,0.5);
+      box-shadow: 0 0 0 6px rgba(140,170,255,0.06), 0 10px 30px rgba(0,0,0,0.35);
+      transition: transform 120ms ease, opacity 160ms ease, border-color 160ms ease;
+      will-change: transform, opacity;
+    }
+    .finger[data-state="moving"] {
+      transform: scale(0.92);
+      border-color: rgba(255,180,120,0.7);
+    }
+
+    /* Gagnant: pulsation + anneau */
+    .finger.winner {
+      background: radial-gradient(closest-side, rgba(120,255,180,0.28), rgba(120,255,180,0.06));
+      border-color: rgba(120,255,180,0.9);
+      box-shadow:
+        0 0 0 10px rgba(120,255,180,0.10),
+        0 0 0 24px rgba(120,255,180,0.06),
+        0 18px 45px rgba(0,0,0,0.45);
+      animation: pulse 900ms ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.08); }
+    }
+
+    /* Bandeau bas */
+    #footer {
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(0deg, rgba(255,255,255,0.06), transparent);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    #status {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="hud">
+      <div id="title">Finger Chooser</div>
+      <div id="controls">
+        <button class="btn" id="resetBtn" title="Réinitialiser">Encore</button>
+      </div>
+    </div>
+
+    <div id="stage">
+      <div id="hint">
+        Posez <b>au moins deux doigts</b> sur l’écran<br>
+        puis ne bougez plus ~½ seconde.<br>
+        <small>Un des doigts sera choisi aléatoirement.</small>
+      </div>
+    </div>
+
+    <div id="footer">
+      <div id="status">Prêt</div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const MIN_TOUCHES = 2;           // minimum de doigts pour tirer au sort
+      const STABLE_MS = 550;           // durée de stabilisation requise
+      const MOVE_TOL = 12;             // tolérance de mouvement (px)
+      const MAX_MARKER_DISTANCE = 300; // anti-saut lors d’un recalc d’offset (sécurité UI)
+
+      const stage = document.getElementById('stage');
+      const hint = document.getElementById('hint');
+      const statusEl = document.getElementById('status');
+      const resetBtn = document.getElementById('resetBtn');
+
+      const touches = new Map(); // id -> {x,y,ox,oy, moved:boolean, el:HTMLElement}
+      let phase = 'idle';        // 'idle' | 'collecting' | 'selected'
+      let stableTimer = null;
+      let winnerId = null;
+
+      // Empêche safari de faire défiler/zoomer
+      ['touchstart','touchmove','touchend','touchcancel','gesturestart'].forEach(ev =>
+        document.addEventListener(ev, (e) => e.preventDefault(), { passive: false })
+      );
+
+      // Helpers UI
+      const setStatus = (txt) => statusEl.textContent = txt;
+      const showHint = (show) => hint.style.display = show ? 'block' : 'none';
+
+      function upsertFinger(id, x, y) {
+        let obj = touches.get(id);
+        if (!obj) {
+          const el = document.createElement('div');
+          el.className = 'finger';
+          el.dataset.id = id;
+          stage.appendChild(el);
+          obj = { x, y, ox: x, oy: y, moved: false, el };
+          touches.set(id, obj);
+        } else {
+          const dx = Math.abs(x - obj.ox);
+          const dy = Math.abs(y - obj.oy);
+          const dist = Math.hypot(dx, dy);
+          if (dist > MOVE_TOL) obj.moved = true;
+          // si énorme saut (rotation d’écran / resize), on ré-initialise l’origine pour éviter faux "moved"
+          if (dist > MAX_MARKER_DISTANCE) { obj.ox = x; obj.oy = y; }
+          obj.x = x; obj.y = y;
+        }
+        // placer l’élément
+        obj.el.style.left = `${obj.x}px`;
+        obj.el.style.top  = `${obj.y}px`;
+        obj.el.dataset.state = obj.moved ? 'moving' : 'still';
+        return obj;
+      }
+
+      function removeFinger(id) {
+        const obj = touches.get(id);
+        if (obj) {
+          obj.el.style.opacity = '0';
+          setTimeout(() => obj.el.remove(), 150);
+          touches.delete(id);
+        }
+      }
+
+      function clearAllFingers() {
+        touches.forEach(t => t.el.remove());
+        touches.clear();
+      }
+
+      function cancelStableTimer() {
+        if (stableTimer) { clearTimeout(stableTimer); stableTimer = null; }
+      }
+
+      function maybeStartStableWindow() {
+        cancelStableTimer();
+        if (phase !== 'collecting') return;
+        if (touches.size < MIN_TOUCHES) return;
+        // si un doigt bouge, on repousse la fenêtre
+        if ([...touches.values()].some(t => t.moved)) return;
+
+        stableTimer = setTimeout(() => {
+          // recheck immobility
+          if (phase === 'collecting' &&
+              touches.size >= MIN_TOUCHES &&
+              ![...touches.values()].some(t => t.moved)) {
+            selectRandom();
+          }
+        }, STABLE_MS);
+      }
+
+      function selectRandom() {
+        const ids = [...touches.keys()];
+        if (ids.length < MIN_TOUCHES) return;
+
+        // tirage uniforme
+        const idx = Math.floor(Math.random() * ids.length);
+        winnerId = ids[idx];
+
+        touches.forEach((t, id) => {
+          t.el.classList.toggle('winner', id === winnerId);
+        });
+
+        phase = 'selected';
+        setStatus('Gagnant choisi ! Levez les doigts ou touchez « Encore ».');
+        showHint(false);
+        // haptics (iOS WebKit ne supporte pas vibrate, on se contente de l’anim visuelle)
+      }
+
+      function toCollecting() {
+        if (phase !== 'collecting') {
+          phase = 'collecting';
+          winnerId = null;
+          setStatus('Ne bougez plus…');
+          showHint(false);
+        }
+        maybeStartStableWindow();
+      }
+
+      function toIdle() {
+        phase = 'idle';
+        winnerId = null;
+        cancelStableTimer();
+        clearAllFingers();
+        setStatus('Prêt');
+        showHint(true);
+      }
+
+      // Événements tactiles
+      stage.addEventListener('touchstart', (e) => {
+        for (const t of e.changedTouches) {
+          upsertFinger(t.identifier, t.clientX, t.clientY);
+        }
+        if (touches.size >= MIN_TOUCHES && phase !== 'selected') {
+          toCollecting();
+        }
+        if (phase === 'selected') {
+          // si on retouche pendant l’état "selected", on ignore (on attend reset ou Encore)
+        } else {
+          maybeStartStableWindow();
+        }
+      }, { passive: false });
+
+      stage.addEventListener('touchmove', (e) => {
+        for (const t of e.changedTouches) {
+          if (!touches.has(t.identifier)) continue;
+          upsertFinger(t.identifier, t.clientX, t.clientY);
+        }
+        if (phase === 'collecting') {
+          // mouvement => repousse la fenêtre de stabilisation
+          maybeStartStableWindow();
+        }
+      }, { passive: false });
+
+      function handleEndLike(e) {
+        for (const t of e.changedTouches) {
+          removeFinger(t.identifier);
+        }
+        if (phase === 'collecting') {
+          cancelStableTimer();
+          if (touches.size >= MIN_TOUCHES) {
+            // relance une fenêtre si encore assez de doigts
+            // (ex: un doigt se lève puis revient)
+            maybeStartStableWindow();
+          } else {
+            // pas assez de doigts → retour idle
+            toIdle();
+          }
+        } else if (phase === 'selected') {
+          if (touches.size === 0) {
+            // Tous les doigts levés → prêt pour un nouveau tour
+            toIdle();
+          }
+        } else {
+          if (touches.size === 0) toIdle();
+        }
+      }
+      stage.addEventListener('touchend', handleEndLike, { passive: false });
+      stage.addEventListener('touchcancel', handleEndLike, { passive: false });
+
+      // Bouton Encore (reset)
+      resetBtn.addEventListener('click', () => {
+        toIdle();
+      });
+
+      // Sécurité: reset si orientation change
+      window.addEventListener('orientationchange', () => {
+        setTimeout(toIdle, 120);
+      });
+
+      // Premier état
+      toIdle();
+    })();
+  </script>
+</body>
+</html>
