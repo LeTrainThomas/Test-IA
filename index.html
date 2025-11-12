@@ -3,13 +3,11 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <title>Quiz Définitions</title>
+  <title>SC04 — Quiz Définitions & Concepts</title>
 
-  <!-- Tailwind & React UMD -->
+  <!-- Tailwind + React (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = { darkMode: ['class','[data-theme="dark"]'] };
-  </script>
+  <script>tailwind.config = { darkMode: ['class','[data-theme="dark"]'] };</script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
@@ -25,609 +23,406 @@
   <div id="live" class="visually-hidden" role="status" aria-live="polite"></div>
   <pre id="err"></pre>
 
-  <script>
-  (function(){
-    const h = React.createElement;
-    const $ = sel => document.querySelector(sel);
-    const now = () => Date.now();
+<script>
+(function(){
+  const h = React.createElement;
+  const $ = s => document.querySelector(s);
+  const now = () => Date.now();
 
-    // --- mini overlay d'erreurs (évite l'écran blanc silencieux)
-    const err = (e) => { const n = $('#err'); n.textContent = (n.textContent? n.textContent+"\n":'') + (e && e.stack || e); n.classList.add('show'); console.error(e); };
-    window.addEventListener('error', e=> err(e.error||e.message));
-    window.addEventListener('unhandledrejection', e=> err(e.reason||e));
+  // --- mini overlay erreurs
+  const err = (e)=>{ const n=$('#err'); n.textContent=(n.textContent?n.textContent+"\n":'')+(e&&e.stack||e); n.classList.add('show'); console.error(e); };
+  window.addEventListener('error', e=>err(e.error||e.message));
+  window.addEventListener('unhandledrejection', e=>err(e.reason||e));
 
-    // --- IndexedDB minimal
-    const idb = {
-      open(name='defs-quiz-db', v=1){
-        return new Promise((res,rej)=>{
-          const r = indexedDB.open(name, v);
-          r.onupgradeneeded = ()=> {
-            const db=r.result;
-            if(!db.objectStoreNames.contains('decks')) db.createObjectStore('decks',{keyPath:'id'});
-            if(!db.objectStoreNames.contains('settings')) db.createObjectStore('settings',{keyPath:'id'});
-            if(!db.objectStoreNames.contains('sessions')) db.createObjectStore('sessions',{keyPath:'id'});
-          };
-          r.onsuccess = ()=> res(r.result);
-          r.onerror = ()=> rej(r.error);
-        });
-      },
-      async put(db, store, val){ await new Promise((res,rej)=>{ const tx=db.transaction(store,'readwrite'); tx.objectStore(store).put(val).onsuccess=()=>res(); tx.onerror=()=>rej(tx.error); }); },
-      async get(db, store, key){ return new Promise((res,rej)=>{ const tx=db.transaction(store,'readonly'); tx.objectStore(store).get(key).onsuccess=(e)=>res(e.target.result); tx.onerror=()=>rej(tx.error); }); },
-      async all(db, store){ return new Promise((res,rej)=>{ const tx=db.transaction(store,'readonly'); tx.objectStore(store).getAll().onsuccess=(e)=>res(e.target.result); tx.onerror=()=>rej(tx.error); }); },
-      async del(db, store, key){ await new Promise((res,rej)=>{ const tx=db.transaction(store,'readwrite'); tx.objectStore(store).delete(key).onsuccess=()=>res(); tx.onerror=()=>rej(tx.error); }); },
-    };
-
-    // --- utils
-    const rand = n => Math.floor(Math.random()*n);
-    const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=rand(i+1); [a[i],a[j]]=[a[j],a[i]] } return a; };
-    const levenshtein = (a,b)=>{ const m=a.length,n=b.length,dp=Array.from({length:m+1},(_,i)=>Array(n+1).fill(0)); for(let i=0;i<=m;i++) dp[i][0]=i; for(let j=0;j<=n;j++) dp[0][j]=j; for(let i=1;i<=m;i++) for(let j=1;j<=n;j++){ const c=a[i-1]===b[j-1]?0:1; dp[i][j]=Math.min(dp[i-1][j]+1,dp[i][j-1]+1,dp[i-1][j-1]+c);} return dp[m][n]; };
-    const textSim = (a,b)=>{ const sa=new Set(a.toLowerCase().split(/\W+/).filter(Boolean)); const sb=new Set(b.toLowerCase().split(/\W+/).filter(Boolean)); const inter=[...sa].filter(x=>sb.has(x)).length; const union=new Set([...sa,...sb]).size||1; return inter/union; };
-    const toCSV = rows => {
-      const headers = Object.keys(rows[0]||{});
-      const esc = v => `"${String(v??'').replace(/"/g,'""')}"`;
-      return headers.join(',') + '\n' + rows.map(r=> headers.map(h=>esc(r[h]||'')).join(',')).join('\n');
-    };
-
-    // --- i18n
-    const t = (k)=> ({
-      appTitle:'Quiz Définitions',
-      decks:'Decks', quiz:'Quiz', stats:'Stats', settings:'Réglages', importExport:'Import / Export', help:'Aide/Docs',
-      createDeck:'Créer un deck', rename:'Renommer', duplicate:'Dupliquer', delete:'Supprimer',
-      addCard:'Ajouter une carte', term:'Mot', definition:'Définition', tags:'Tags',
-      deckSelect:'Sélectionner un deck', modeA:'Définition → Mot', modeB:'Mot → Définition', mixed:'Mixte',
-      chooseCount:'Nombre de questions', unlimited:'Illimité', timer:'Minuteur', sr:'Répétition espacée',
-      start:'Démarrer', next:'Question suivante', quit:'Quitter', correct:'Correct', incorrect:'Incorrect',
-      keyboard:'Raccourcis : 1–4 (choix), Entrée (valider), N (suivant)',
-      need4:'Ajoute au moins 4 cartes dans ce deck pour lancer un quiz.',
-      preview:'Prévisualisation', import:'Importer', export:'Exporter', success:'Opération réussie',
-      duplicates:'Doublons détectés', merge:'Fusionner', overwrite:'Écraser', ignore:'Ignorer',
-      globalStats:'Statistiques globales', questions:'Questions', score:'Score', avgTime:'Temps moyen',
-      deck:'Deck', homeStart:'Démarrer un quiz rapide', language:'Langue', theme:'Thème',
-      light:'Clair', dark:'Sombre', system:'Système', exportData:'Exporter données (JSON)'
-    }[k]||k);
-
-    // --- defaults + demo
-    const defaultSettings = { id:'app', theme:'system', sr:true, timerSeconds:0, language:'fr', masteredThreshold:0.85 };
-    const demoDeck = {
-      id:'deck-demo', name:'Sciences mixtes', createdAt:now(), updatedAt:now(), cards:[
-        {id:crypto.randomUUID(), term:'Osmose', definition:'Passage de solvant à travers une membrane semi-perméable', tags:['biologie'], createdAt:now(), updatedAt:now()},
-        {id:crypto.randomUUID(), term:'Entropie', definition:'Mesure du désordre d\'un système', tags:['physique','thermo'], createdAt:now(), updatedAt:now()},
-        {id:crypto.randomUUID(), term:'API', definition:'Interface permettant à deux logiciels de communiquer', tags:['informatique'], createdAt:now(), updatedAt:now()},
-        {id:crypto.randomUUID(), term:'Algorithme', definition:'Suite finie et non ambiguë d’instructions pour résoudre un problème', tags:['informatique'], createdAt:now(), updatedAt:now()},
-        {id:crypto.randomUUID(), term:'Hypothèse', definition:'Proposition à vérifier par l’expérience ou l’observation', tags:['science'], createdAt:now(), updatedAt:now()},
-        {id:crypto.randomUUID(), term:'Diffusion', definition:'Mouvement net de particules d’une zone concentrée vers une zone moins concentrée', tags:['biologie','physique'], createdAt:now(), updatedAt:now()},
-        {id:crypto.randomUUID(), term:'pH', definition:'Mesure de l’acidité ou basicité d’une solution', tags:['chimie'], createdAt:now(), updatedAt:now()},
-        {id:crypto.randomUUID(), term:'Vecteur', definition:'Objet défini par une magnitude et une direction', tags:['maths','physique'], createdAt:now(), updatedAt:now()},
-        {id:crypto.randomUUID(), term:'Dérivée', definition:'Taux de variation instantané d’une fonction', tags:['maths'], createdAt:now(), updatedAt:now()},
-        {id:crypto.randomUUID(), term:'Photosynthèse', definition:'Conversion d’énergie lumineuse en énergie chimique par les plantes', tags:['biologie'], createdAt:now(), updatedAt:now()},
-        {id:crypto.randomUUID(), term:'Isotope', definition:'Atomes d’un même élément avec nombre de neutrons différent', tags:['chimie'], createdAt:now(), updatedAt:now()},
-        {id:crypto.randomUUID(), term:'Inertie', definition:'Résistance d’un corps à la modification de son mouvement', tags:['physique'], createdAt:now(), updatedAt:now()},
-      ]
-    };
-
-    // --- SM-2 simple
-    const DAY = 24*60*60*1000;
-    const initStats = (s)=> ({ attempts:0, correct:0, lastSeen:0, ease:2.5, interval:0, due:0, ...(s||{}) });
-    const updateSM2 = (s, grade)=> {
-      let {ease=2.5, interval=0} = s;
-      if (grade<3) interval = 1;
-      else { if (interval===0) interval=1; else if (interval===1) interval=6; else interval = Math.round(interval*ease); }
-      ease = Math.max(1.3, ease + (0.1 - (5-grade)*(0.08 + (5-grade)*0.02)));
-      return { ...s, ease, interval, due: Date.now() + interval*DAY };
-    };
-
-    // --- Hash router
-    function useHashRoute(){
-      const [path, setPath] = React.useState(location.hash.slice(1)||'/');
-      React.useEffect(()=>{
-        const f=()=> setPath(location.hash.slice(1)||'/');
-        window.addEventListener('hashchange', f);
-        return ()=> window.removeEventListener('hashchange', f);
-      },[]);
-      return [path, (p)=> location.hash = p];
-    }
-
-    // --- data accessors
-    let DB;
-    async function loadDecks(){ return await idb.all(DB,'decks'); }
-    async function saveDeck(deck){ deck.updatedAt=now(); await idb.put(DB,'decks', deck); }
-    async function removeDeck(id){ await idb.del(DB,'decks', id); }
-    async function getSettings(){ return await idb.get(DB,'settings','app') || defaultSettings; }
-    async function saveSettings(s){ await idb.put(DB,'settings',{...defaultSettings, ...(s||{})}); }
-    async function pushSession(s){ await idb.put(DB,'sessions', s); }
-
-    // --- seed
-    async function ensureSeed(){
-      const decks = await loadDecks();
-      if (!decks.length) await saveDeck(JSON.parse(JSON.stringify(demoDeck)));
-      if (!await idb.get(DB,'settings','app')) await saveSettings(defaultSettings);
-    }
-
-    // --- quiz helpers
-    function pickWeighted(cards, srOn){
-      const due = srOn ? cards.filter(c=> (c.stats?.due||0)<=Date.now()) : [];
-      const pool = due.length ? due : cards;
-      const weights = pool.map(c=>{
-        const st=c.stats||{attempts:0,correct:0}; const rate=st.attempts ? (st.correct/st.attempts) : 0;
-        return 1.5 - rate;
+  // --- IndexedDB minimal
+  const idb = {
+    open(name='defs-quiz-db', v=2){
+      return new Promise((res,rej)=>{
+        const r = indexedDB.open(name, v);
+        r.onupgradeneeded = ()=> {
+          const db=r.result;
+          if(!db.objectStoreNames.contains('decks')) db.createObjectStore('decks',{keyPath:'id'});
+          if(!db.objectStoreNames.contains('settings')) db.createObjectStore('settings',{keyPath:'id'});
+          if(!db.objectStoreNames.contains('sessions')) db.createObjectStore('sessions',{keyPath:'id'});
+        };
+        r.onsuccess=()=>res(r.result);
+        r.onerror =()=>rej(r.error);
       });
-      let sum = weights.reduce((a,b)=>a+b,0), r=Math.random()*sum;
-      for (let i=0;i<pool.length;i++){ r-=weights[i]; if(r<=0) return pool[i]; }
-      return pool[pool.length-1];
+    },
+    async put(db,store,val){await new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite'); tx.objectStore(store).put(val).onsuccess=()=>res(); tx.onerror=()=>rej(tx.error);});},
+    async get(db,store,key){return new Promise((res,rej)=>{const tx=db.transaction(store,'readonly'); tx.objectStore(store).get(key).onsuccess=e=>res(e.target.result); tx.onerror=()=>rej(tx.error);});},
+    async all(db,store){return new Promise((res,rej)=>{const tx=db.transaction(store,'readonly'); tx.objectStore(store).getAll().onsuccess=e=>res(e.target.result); tx.onerror=()=>rej(tx.error);});},
+    async del(db,store,key){await new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite'); tx.objectStore(store).delete(key).onsuccess=()=>res(); tx.onerror=()=>rej(tx.error);});},
+  };
+
+  // --- utils
+  const rand = n => Math.floor(Math.random()*n);
+  const shuffle = a => {a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=rand(i+1); [a[i],a[j]]=[a[j],a[i]] } return a;};
+  const levenshtein = (a,b)=>{ const m=a.length,n=b.length,dp=Array.from({length:m+1},()=>Array(n+1).fill(0)); for(let i=0;i<=m;i++) dp[i][0]=i; for(let j=0;j<=n;j++) dp[0][j]=j; for(let i=1;i<=m;i++) for(let j=1;j<=n;j++){ const c=a[i-1]===b[j-1]?0:1; dp[i][j]=Math.min(dp[i-1][j]+1,dp[i][j-1]+1,dp[i-1][j-1]+c);} return dp[m][n]; };
+  const textSim = (a,b)=>{ const sa=new Set(a.toLowerCase().split(/\W+/).filter(Boolean)); const sb=new Set(b.toLowerCase().split(/\W+/).filter(Boolean)); const inter=[...sa].filter(x=>sb.has(x)).length; const union=new Set([...sa,...sb]).size||1; return inter/union; };
+
+  // --- i18n
+  const t=(k)=>({
+    appTitle:'SC04 — Quiz',
+    decks:'Decks', quiz:'Quiz', stats:'Stats', settings:'Réglages', importExport:'Import / Export', help:'Aide/Docs',
+    createDeck:'Créer un deck', rename:'Renommer', duplicate:'Dupliquer', delete:'Supprimer',
+    addCard:'Ajouter une carte', term:'Mot', definition:'Définition', tags:'Tags',
+    deckSelect:'Sélectionner un ou plusieurs decks', modeA:'Définition → Mot', modeB:'Mot → Définition', mixed:'Mixte',
+    chooseCount:'Nombre de questions', unlimited:'Illimité', timer:'Minuteur', sr:'Répétition espacée',
+    start:'Démarrer', next:'Question suivante', quit:'Quitter', correct:'Correct', incorrect:'Incorrect',
+    keyboard:'Raccourcis : 1–4 (choix) • Entrée (valider) • N (suiv.)',
+    need4:'Ajoute au moins 4 cartes dans ce deck pour lancer un quiz.',
+    definitions:'Définitions', concepts:'Concepts', all:'Tout',
+    quickPick:'Sélection rapide', theme:'Thème',
+    light:'Clair', dark:'Sombre', system:'Système'
+  }[k]||k);
+
+  // --- DATA (extrait de tes CM)
+  function deck(id,name,cards){ return {id, name, createdAt:now(), updatedAt:now(), cards}; }
+  function card(term,definition,tags=[]){ return { id:crypto.randomUUID(), term, definition, tags, createdAt:now(), updatedAt:now() }; }
+
+  const DECK_DEFS = deck('deck-defs','Définitions SC04',[
+    card('Psychologie', "Science visant à comprendre la structure et le fonctionnement de l’activité mentale et des comportements associés.", ['CM1','Déf.']), // CM1b
+    card('Communication', "Transmission d’un message entre individus via un code et un média, pour atteindre un but.", ['CM1','Déf.']),
+    card('Persuasion', "Modification de l’intériorité (pensée, jugement…) par un message (discours, texte…).", ['CM1','Déf.']),
+    card('Communication non verbale', "Ensemble des comportements de communication autres que les paroles, produits intentionnellement ou non.", ['CM2','Non verbal']),
+    card('Émotion', "Affect bref lié à un déclencheur identifiable, orienté vers un objet, avec trois composantes : sensations physiques, représentations mentales, réponses motrices.", ['CM3','Émotions']),
+    card('Groupe (définition minimale)', "Collection d’individus en même temps/lieu, en interaction et interdépendants, avec une raison d’être ensemble.", ['CM5','Groupes']),
+    card('Identité sociale', "Partie du concept de soi issue de l’appartenance à des groupes, avec valeur et signification émotionnelle associées.", ['CM5','Identité']),
+    card('Catégorisation sociale', "Distinction endogroupe (« nous ») / exogroupe (« eux ») accompagnée d’assimilation intra-groupe et de contraste inter-groupes.", ['CM5','Identité']),
+    card('Obéissance', "Modification du comportement pour se soumettre à l’ordre d’une autorité légitime (ou perçue comme telle).", ['CM4','Influence']),
+    card('Expérimentation (méthode)', "Recréer en situation contrôlée un phénomène pour en identifier les causes via VI/VD.", ['CM1','Méthodes']),
+    card('Observation (méthode)', "Décrire le réel (gestes, documents, etc.) dans son contexte.", ['CM1','Méthodes']),
+    card('Entretien (méthode)', "Recueillir des informations dans un cadre spécifié (directif/non), voire provoquer un changement.", ['CM1','Méthodes']),
+    card('Questionnaire (méthode)', "Suite organisée d’items présentés aux participants (en face à face ou non).", ['CM1','Méthodes']),
+    card('Tests (méthode)', "Exercices fournissant des renseignements techniques/intellectuels/psychiques pour évaluer/orienter.", ['CM1','Méthodes']),
+    card('Sociométrie', "Technique qui repère la dynamique socio-affective (attraction/rejet) et la cohésion d’un groupe.", ['CM6','Dynamique']),
+    card('Rôle (en groupe)', "Ensemble des conduites caractéristiques attendues dans une situation donnée ; lié à la participation et à l’influence.", ['CM6','Bales']),
+    card('Statut (en groupe)', "Position institutionnelle avec droits et devoirs associés ; distinct du rôle.", ['CM6','Bales']),
+  ]);
+
+  const DECK_CONCEPTS = deck('deck-concepts','Concepts & théories SC04',[
+    card('Approche catégorielle des émotions (Ekman)', "6 émotions de base (joie, peur, tristesse, colère, surprise, dégoût) + émotions secondaires influencées par la culture.", ['CM3','Émotions']),
+    card('Contrôle de l’expression émotionnelle', "Trois stratégies : diminuer, augmenter, masquer/substituer l’émotion (apprentissage des normes).", ['CM3','Émotions']),
+    card('Kinèmes (Birdwhistell)', "Découpage descriptif des comportements non verbaux en unités observables.", ['CM2','Non verbal']),
+    card('Typologie fonctionnelle (Cosnier)', "Gestes illustratifs/expressifs/paraverbaux/synchronisateurs, quasi-linguistiques ; et gestes extra-communicatifs.", ['CM2','Non verbal']),
+    card('Polysémie du regard', "Recherche d’info, attraction/évitement, gestion des tours de parole et de la référence.", ['CM2','Non verbal']),
+    card('Effet caméléon', "Imitation non verbale favorise l’interaction et rend l’imitateur plus apprécié.", ['CM2','Non verbal']),
+    card('Accommodation (Giles)', "Ajustement du style de communication pour se rapprocher/s’éloigner de l’interlocuteur.", ['CM2','Non verbal']),
+    card('Formation d’impression (Asch, 1946)', "Impression d’autrui rapide, inévitable, à partir de peu d’indices.", ['CM3','Apparence']),
+    card('Influence majoritaire', "Dépendance normative : examen superficiel, conformité sans adoption profonde.", ['CM4','Influence']),
+    card('Influence minoritaire', "Dépendance informationnelle : conflit cognitif, examen approfondi ; influence différée/latente.", ['CM4','Influence']),
+    card('Conditions influence minoritaire (Moscovici)', "Reconnaissance sociale, consistance, faible cohésion majoritaire, investissement, autonomie…", ['CM4','Influence']),
+    card('Polarisation de groupe', "Discussion/prise de décision rendent les positions plus extrêmes dans le sens initial.", ['CM4','Décision']),
+    card('Théorie des conflits réels (Sherif)', "Compétition pour ressources limitées → préjugés/discrimination ; buts supra-ordonnés réduisent l’hostilité.", ['CM5','Intergroupes']),
+    card('Paradigme des groupes minimaux', "Catégorisation arbitraire suffit à produire favoritisme intra-groupe et différenciation.", ['CM5','Intergroupes']),
+    card('Réactance (Brehm)', "Réaction négative à la contrainte perçue → baisse de l’impact persuasif.", ['CM7','Persuasion']),
+    card('Source : attractivité/ crédibilité', "Être perçu comme attirant/compétent accroît l’influence.", ['CM7','Persuasion']),
+    card('Message : unilatéral vs bilatéral', "Unilatéral efficace si opposition forte/faible instruction ; bilatéral si opposition faible/instruction forte.", ['CM7','Persuasion']),
+    card('Message : conclusion explicite', "Formuler la conclusion peut renforcer l’effet selon contexte et public.", ['CM7','Persuasion']),
+    card('Vision de Lewin C=f(P,E)', "Comportement fonction de la personne et de l’environnement ; groupe comme champ dynamique, objectifs partagés, interdépendance.", ['CM6','Lewin']),
+    card('Rôles/leadership (Bales)', "Rôles émergent avec la participation ; leadership et structure influent sur performance/satisfaction.", ['CM6','Bales']),
+  ]);
+
+  // --- paramètres / seed
+  const defaultSettings = { id:'app', theme:'system', sr:true, timerSeconds:0, language:'fr', masteredThreshold:0.85 };
+
+  let DB;
+  async function loadDecks(){ return await idb.all(DB,'decks'); }
+  async function saveDeck(d){ d.updatedAt=now(); await idb.put(DB,'decks',d); }
+  async function getSettings(){ return await idb.get(DB,'settings','app') || defaultSettings; }
+  async function saveSettings(s){ await idb.put(DB,'settings',{...defaultSettings,...(s||{})}); }
+  async function ensureSeed(){
+    const decks = await loadDecks();
+    if (!decks.length){
+      await saveDeck(JSON.parse(JSON.stringify(DECK_DEFS)));
+      await saveDeck(JSON.parse(JSON.stringify(DECK_CONCEPTS)));
+      await saveSettings(defaultSettings);
     }
-    const notTooSimilarTerm = (a,b)=> levenshtein(a,b) >= 3;
-    const notTooSimilarDef  = (a,b)=> textSim(a,b) <= 0.9;
+  }
 
-    function makeQuestion(deckCards, params){
-      const eligible = deckCards;
-      if (eligible.length<4) return null;
-      const target = pickWeighted(eligible, params.sr);
-      const mode = params.mode==='mix' ? (Math.random()<0.5?'A':'B') : params.mode;
-      const correct = (mode==='A') ? target.term : target.definition;
-      const bank = (mode==='A') ? eligible.map(c=>c.term) : eligible.map(c=>c.definition);
-      const validator = (mode==='A')
-        ? (x)=> notTooSimilarTerm(x, correct)
-        : (x)=> notTooSimilarDef(x, correct);
-      const options = [correct];
-      const bag = shuffle(bank.slice());
-      for (const x of bag){
-        if (options.length===4) break;
-        if (x===correct) continue;
-        if (!validator(x)) continue;
-        if (options.includes(x)) continue;
-        options.push(x);
-      }
-      return { prompt: (mode==='A')? target.definition : target.term, options: shuffle(options), answer: correct, cardId: target.id, explain: target.term+' — '+target.definition };
-    }
+  // --- SM-2 simple
+  const DAY=24*60*60*1000;
+  const initStats=(s)=>({ attempts:0, correct:0, lastSeen:0, ease:2.5, interval:0, due:0, ...(s||{}) });
+  const updateSM2=(s,grade)=>{ let {ease=2.5,interval=0}=s; if(grade<3) interval=1; else { if(interval===0) interval=1; else if(interval===1) interval=6; else interval=Math.round(interval*ease); } ease=Math.max(1.3, ease+(0.1-(5-grade)*(0.08+(5-grade)*0.02))); return {...s, ease, interval, due:Date.now()+interval*DAY}; };
 
-    // --- UI bits
-    const Button = (p)=> h('button', {className:
-      "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium border bg-white/80 dark:bg-slate-800/60 hover:bg-slate-100/70 dark:hover:bg-slate-800 focus-visible:ring-2 ring-emerald-400 " + (p.className||''), ...p});
+  // --- router
+  function useHashRoute(){
+    const [path,setPath]=React.useState(location.hash.slice(1)||'/');
+    React.useEffect(()=>{ const f=()=>setPath(location.hash.slice(1)||'/'); window.addEventListener('hashchange',f); return()=>window.removeEventListener('hashchange',f); },[]);
+    return [path,(p)=>location.hash=p];
+  }
 
-    const Nav = ({go}) => h('header', {className:"sticky top-0 z-20 border-b bg-white/70 dark:bg-slate-900/70 backdrop-blur"},
-      h('div',{className:"mx-auto max-w-6xl px-4 py-3 flex items-center gap-3"},
-        h('div',{className:"font-semibold"}, t('appTitle')),
-        h('nav',{className:"ml-auto flex gap-2"},
-          h(Button,{onClick:()=>go('/'), className:""}, "Accueil"),
-          h(Button,{onClick:()=>go('/decks')}, t('decks')),
-          h(Button,{onClick:()=>go('/quiz')}, t('quiz')),
-          h(Button,{onClick:()=>go('/stats')}, t('stats')),
-          h(Button,{onClick:()=>go('/import-export')}, t('importExport')),
-          h(Button,{onClick:()=>go('/settings')}, t('settings')),
-          h(Button,{onClick:()=>go('/help')}, t('help')),
-        )
-      )
-    );
+  // --- quiz helpers
+  function pickWeighted(cards, srOn){
+    const due = srOn? cards.filter(c=>(c.stats?.due||0)<=Date.now()) : [];
+    const pool = due.length? due : cards;
+    const weights = pool.map(c=>{ const st=c.stats||{attempts:0,correct:0}; const rate=st.attempts?(st.correct/st.attempts):0; return 1.5-rate; });
+    let sum=weights.reduce((a,b)=>a+b,0), r=Math.random()*sum;
+    for(let i=0;i<pool.length;i++){ r-=weights[i]; if(r<=0) return pool[i]; }
+    return pool[pool.length-1];
+  }
+  const notTooSimilarTerm = (a,b)=> levenshtein(a,b)>=3;
+  const notTooSimilarDef  = (a,b)=> textSim(a,b)<=0.9;
 
-    const Home = ({go}) => h('div',{className:"mx-auto max-w-3xl p-4 space-y-4"},
-      h('h1',{className:"text-xl font-semibold"},"Bienvenue 👋"),
-      h('p',{className:"text-slate-600 dark:text-slate-300"},"Crée tes decks, importe un CSV/JSON, révise en QCM (SR incluse). Tout reste local."),
-      h('div',{className:"flex gap-2"},
-        h(Button,{onClick:()=>go('/quiz')}, t('homeStart')),
+  function makeQuestion(deckCards, params){
+    const eligible = deckCards;
+    if(eligible.length<4) return null;
+    const target = pickWeighted(eligible, params.sr);
+    const mode = params.mode==='mix' ? (Math.random()<0.5?'A':'B') : params.mode;
+    const correct = (mode==='A')? target.term : target.definition;
+    const bank = (mode==='A')? eligible.map(c=>c.term) : eligible.map(c=>c.definition);
+    const validator = (mode==='A')? (x)=>notTooSimilarTerm(x,correct) : (x)=>notTooSimilarDef(x,correct);
+    const options=[correct]; const bag=shuffle(bank.slice());
+    for(const x of bag){ if(options.length===4) break; if(x===correct) continue; if(!validator(x)) continue; if(options.includes(x)) continue; options.push(x); }
+    return { prompt: (mode==='A')? target.definition : target.term, options: shuffle(options), answer: correct, cardId: target.id, explain: target.term+' — '+target.definition };
+  }
+
+  // --- UI bits
+  const Button = (p)=> h('button',{className:"inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium border bg-white/80 dark:bg-slate-800/60 hover:bg-slate-100/70 dark:hover:bg-slate-800 focus-visible:ring-2 ring-emerald-400 "+(p.className||''),...p});
+  const Nav = ({go}) => h('header',{className:"sticky top-0 z-20 border-b bg-white/70 dark:bg-slate-900/70 backdrop-blur"},
+    h('div',{className:"mx-auto max-w-6xl px-4 py-3 flex items-center gap-3"},
+      h('div',{className:"font-semibold"}, t('appTitle')),
+      h('nav',{className:"ml-auto flex gap-2"},
+        h(Button,{onClick:()=>go('/')}, "Accueil"),
         h(Button,{onClick:()=>go('/decks')}, t('decks')),
-        h(Button,{onClick:()=>go('/import-export')}, t('importExport')),
+        h(Button,{onClick:()=>go('/quiz')}, t('quiz')),
+        h(Button,{onClick:()=>go('/stats')}, t('stats')),
+        h(Button,{onClick:()=>go('/settings')}, t('settings')),
+        h(Button,{onClick:()=>go('/help')}, t('help')),
+      )
+    )
+  );
+
+  const Home = ({go}) => h('div',{className:"mx-auto max-w-3xl p-4 space-y-4"},
+    h('h1',{className:"text-xl font-semibold"},"Bienvenue 👋"),
+    h('p',{className:"text-slate-600 dark:text-slate-300"},"Choisis « Quiz » pour lancer une série sur les définitions ou sur les concepts/théories. Tout est stocké localement."),
+    h('div',{className:"flex gap-2"},
+      h(Button,{onClick:()=>go('/quiz')}, "Commencer le quiz"),
+      h(Button,{onClick:()=>go('/decks')}, "Voir les decks"),
+    )
+  );
+
+  const DecksPage = ({go,decks,reload})=>{
+    const [name,setName]=React.useState('');
+    async function create(){
+      if(!name.trim()) return;
+      const d={id:crypto.randomUUID(), name:name.trim(), createdAt:now(), updatedAt:now(), cards:[]};
+      await saveDeck(d); setName(''); reload();
+    }
+    return h('div',{className:"mx-auto max-w-6xl p-4 space-y-4"},
+      h('h1',{className:"text-xl font-semibold"}, t('decks')),
+      h('div',{className:"flex gap-2"},
+        h('input',{className:"w-full rounded-xl border px-3 py-2", placeholder:t('createDeck')+'…', value:name, onChange:e=>setName(e.target.value)}),
+        h(Button,{onClick:create}, t('createDeck'))
+      ),
+      h('div',{className:"grid sm:grid-cols-2 lg:grid-cols-3 gap-3"},
+        decks.map(d=> h('div',{key:d.id,className:"rounded-xl border p-3 bg-white/60 dark:bg-slate-800/40"},
+          h('div',{className:"font-medium"}, d.name),
+          h('div',{className:"text-xs text-slate-500"}, `${(d.cards||[]).length} cartes`),
+          h('div',{className:"mt-2 flex gap-2"},
+            h(Button,{onClick:()=>{ location.hash = `#/decks/:id?id=${d.id}` }}, 'Ouvrir')
+          )
+        ))
       )
     );
+  };
 
-    const DecksPage = ({go, decks, reload}) => {
-      const [name,setName]=React.useState('');
-      async function create(){
-        if(!name.trim()) return;
-        const deck={id:crypto.randomUUID(), name:name.trim(), createdAt:now(), updatedAt:now(), cards:[]};
-        await saveDeck(deck); setName(''); reload();
-      }
-      async function renameDeck(d){
-        const nn = prompt(t('rename'), d.name); if(!nn) return;
-        d.name=nn; await saveDeck(d); reload();
-      }
-      async function duplicate(d){
-        const copy={...d, id:crypto.randomUUID(), name:d.name+' (copie)', createdAt:now(), updatedAt:now(), cards:d.cards.map(c=>({...c,id:crypto.randomUUID(),createdAt:now(),updatedAt:now()}))};
-        await saveDeck(copy); reload();
-      }
-      async function removeD(d){
-        if(!confirm(`${t('delete')} "${d.name}" ?`)) return;
-        await removeDeck(d.id); reload();
-      }
-      return h('div',{className:"mx-auto max-w-6xl p-4 space-y-4"},
-        h('h1',{className:"text-xl font-semibold"}, t('decks')),
-        h('div',{className:"flex gap-2"},
-          h('input',{className:"w-full rounded-xl border px-3 py-2", placeholder:t('createDeck')+'…', value:name, onChange:e=>setName(e.target.value)}),
-          h(Button,{onClick:create}, t('createDeck'))
-        ),
-        h('div',{className:"grid sm:grid-cols-2 lg:grid-cols-3 gap-3"},
-          decks.map(d=> h('div',{key:d.id, className:"rounded-xl border p-3 bg-white/60 dark:bg-slate-800/40"},
-            h('div',{className:"font-medium"}, d.name),
-            h('div',{className:"text-xs text-slate-500"}, `${(d.cards||[]).length} cartes`),
-            h('div',{className:"mt-2 flex gap-2"},
-              h(Button,{onClick:()=>{ location.hash = `#/decks/:id?id=${d.id}` }}, 'Ouvrir'),
-              h(Button,{onClick:()=>renameDeck(d)}, t('rename')),
-              h(Button,{onClick:()=>duplicate(d)}, t('duplicate')),
-              h(Button,{onClick:()=>removeD(d)}, t('delete')),
-            )
+  const DeckDetail = ({deckId})=>{
+    const [deck,setDeck]=React.useState(null);
+    React.useEffect(()=>{ idb.get(DB,'decks',deckId).then(setDeck); },[deckId]);
+    if(!deck) return h('div',{className:"p-4"},"Chargement…");
+    return h('div',{className:"mx-auto max-w-6xl p-4 space-y-4"},
+      h('h1',{className:"text-xl font-semibold"}, deck.name),
+      h('div',{className:"rounded-xl border p-3"},
+        h('div',{className:"text-sm text-slate-500 mb-2"}, `${deck.cards.length} cartes`),
+        h('div',{className:"space-y-2 max-h-[70vh] overflow-auto pr-2"},
+          deck.cards.map(c=> h('div',{key:c.id,className:"border rounded-lg p-2 bg-white/50 dark:bg-slate-800/40"},
+            h('div',{className:"font-medium"}, c.term),
+            h('div',{className:"text-sm text-slate-600 dark:text-slate-300"}, c.definition),
+            h('div',{className:"text-xs mt-1"}, (c.tags||[]).join(' · '))
           ))
         )
-      );
-    };
+      )
+    );
+  };
 
-    const DeckDetail = ({deckId, reload})=>{
-      const [deck,setDeck]=React.useState(null);
-      const [q,setQ]=React.useState('');
-      const [term,setTerm] = React.useState('');
-      const [definition,setDef] = React.useState('');
-      const [tags,setTags]=React.useState('');
-      React.useEffect(()=>{ idb.get(DB,'decks',deckId).then(setDeck); },[deckId]);
-      if(!deck) return h('div',{className:"p-4"},"Chargement…");
-      const filtered = deck.cards.filter(c=>(c.term+c.definition).toLowerCase().includes(q.toLowerCase()));
-      async function add(){
-        const termInput = term || prompt(t('term')) || '';
-        const defInput  = definition || prompt(t('definition')) || '';
-        if(!(termInput.trim() && defInput.trim())) return;
-        const card={id:crypto.randomUUID(), term:termInput.trim(), definition:defInput.trim(), tags: tags? tags.split(';').map(s=>s.trim()) : [], createdAt:now(), updatedAt:now()};
-        deck.cards.push(card); await saveDeck(deck); setTerm(''); setDef(''); setTags(''); idb.get(DB,'decks',deckId).then(setDeck);
-      }
-      async function edit(c){
-        const t1 = prompt(t('term'), c.term); if(t1==null) return;
-        const d1 = prompt(t('definition'), c.definition); if(d1==null) return;
-        const tg = prompt(t('tags'), (c.tags||[]).join(';')); if(tg==null) return;
-        c.term=t1; c.definition=d1; c.tags = tg? tg.split(';').map(s=>s.trim()) : [];
-        c.updatedAt=now(); await saveDeck(deck); idb.get(DB,'decks',deckId).then(setDeck);
-      }
-      async function del(c){
-        if(!confirm(`${t('delete')} "${c.term}" ?`)) return;
-        deck.cards = deck.cards.filter(x=>x.id!==c.id); await saveDeck(deck); idb.get(DB,'decks',deckId).then(setDeck);
-      }
-      return h('div',{className:"mx-auto max-w-6xl p-4 space-y-4"},
-        h('h1',{className:"text-xl font-semibold"}, deck.name),
-        h('div',{className:"flex gap-2"},
-          h('input',{className:"w-full rounded-xl border px-3 py-2", placeholder:"Rechercher…", value:q, onChange:e=>setQ(e.target.value)}),
-          h(Button,{onClick:()=> location.hash = '#/quiz?deck='+deck.id}, t('quiz'))
-        ),
-        h('div',{className:"grid md:grid-cols-2 gap-3"},
-          h('div',{className:"rounded-xl border p-3 space-y-2"},
-            h('div',{className:"font-medium"}, t('addCard')),
-            h('div',{className:"flex gap-2"},
-              h('input',{className:"w-full rounded-xl border px-3 py-2", placeholder:t('term'), value:term, onChange:e=>setTerm(e.target.value)}),
-              h('input',{className:"w-full rounded-xl border px-3 py-2", placeholder:t('definition'), value:definition, onChange:e=>setDef(e.target.value)}),
-              h('input',{className:"w-40 rounded-xl border px-3 py-2", placeholder:t('tags')+' (a;b;c)', value:tags, onChange:e=>setTags(e.target.value)}),
-              h(Button,{onClick:add}, "Ajouter")
-            )
-          ),
-          h('div',{className:"rounded-xl border p-3"},
-            h('div',{className:"text-sm text-slate-500 mb-2"}, `${filtered.length}/${deck.cards.length} cartes`),
-            h('div',{className:"space-y-2 max-h-[60vh] overflow-auto pr-2"},
-              filtered.map(c=> h('div',{key:c.id, className:"border rounded-lg p-2 bg-white/50 dark:bg-slate-800/40"},
-                h('div',{className:"font-medium"}, c.term),
-                h('div',{className:"text-sm text-slate-600 dark:text-slate-300"}, c.definition),
-                h('div',{className:"text-xs mt-1"}, (c.tags||[]).join(' · ')),
-                h('div',{className:"mt-2 flex gap-2"},
-                  h(Button,{onClick:()=>edit(c)}, "Éditer"),
-                  h(Button,{onClick:()=>del(c)}, t('delete')),
-                )
-              ))
-            )
-          )
-        )
-      );
-    };
+  const QuizPage = ({decks})=>{
+    const [params,setParams]=React.useState({ deckIds: decks.map(d=>d.id), mode:'A', limit:10, timerSeconds:0, sr:true });
+    const [pool,setPool]=React.useState([]);
+    const [current,setCurrent]=React.useState(null);
+    const [selected,setSelected]=React.useState(null);
+    const [session,setSession]=React.useState(null);
+    const live = $('#live');
 
-    const QuizPage = ({decks})=>{
-      const qs = new URLSearchParams(location.hash.split('?')[1]||'');
-      const initialDeck = qs.get('deck');
-      const [params,setParams]=React.useState({ deckIds: initialDeck?[initialDeck]: (decks[0]?[decks[0].id]:[]), mode:'A', limit:10, timerSeconds:0, sr:true });
-      const [pool,setPool]=React.useState([]);
-      const [current,setCurrent]=React.useState(null);
-      const [selected,setSelected]=React.useState(null);
-      const [session,setSession]=React.useState(null);
-      const live = $('#live');
+    React.useEffect(()=>{ setPool(decks.filter(d=> params.deckIds.includes(d.id)).flatMap(d=>d.cards)); },[decks, params.deckIds.join(',')]);
 
-      React.useEffect(()=>{ setPool(decks.filter(d=> params.deckIds.includes(d.id)).flatMap(d=>d.cards)); },[decks.map(d=>d.id+d.updatedAt).join(','), params.deckIds.join(',')]);
+    function quickPick(which){
+      if(which==='defs'){ setParams(p=>({...p, deckIds:[DECK_DEFS.id]})); }
+      else if(which==='concepts'){ setParams(p=>({...p, deckIds:[DECK_CONCEPTS.id]})); }
+      else { setParams(p=>({...p, deckIds:decks.map(d=>d.id)})); }
+    }
 
-      function start(){
-        if(pool.length<4){ alert(t('need4')); return; }
-        setSession({id:crypto.randomUUID(), startedAt:now(), deckIds:params.deckIds, questions:0, correct:0, avgTimeMs:0, items:[]});
-        setSelected(null);
-        setCurrent(makeQuestion(pool, params));
-      }
-      async function record(cardId, ok, timeMs){
-        setSession(s=>{
-          const items = [...s.items, {cardId, correct:ok, timeMs}];
-          const questions = s.questions+1;
-          const correct = s.correct + (ok?1:0);
-          const avgTimeMs = Math.round((s.avgTimeMs*s.questions + timeMs)/questions);
-          return {...s, items, questions, correct, avgTimeMs};
-        });
-        const deck = decks.find(d=> d.cards.some(c=>c.id===cardId));
-        if(deck){ const c = deck.cards.find(x=>x.id===cardId);
-          c.stats = initStats(c.stats);
-          c.stats.attempts++; if(ok) c.stats.correct++;
-          c.stats.lastSeen = now();
-          c.stats = updateSM2(c.stats, ok?5:0);
-          await saveDeck(deck);
-        }
-      }
-      let startTime = now();
-      function submit(choice){
-        if(!current || selected) return;
-        const ok = (choice===current.answer);
-        setSelected(choice);
-        live.textContent = ok? t('correct') : t('incorrect');
-        record(current.cardId, ok, now()-startTime);
-      }
-      function next(){
-        setSelected(null);
-        setCurrent(makeQuestion(pool, params));
-        startTime = now();
-      }
-      React.useEffect(()=>{
-        const onKey = (ev)=>{
-          if(!current) return;
-          if(/^[1-4]$/.test(ev.key)){ submit(current.options[Number(ev.key)-1]); }
-          if(ev.key==='Enter' || ev.key.toLowerCase()==='n'){ if(selected) next(); }
-        };
-        window.addEventListener('keydown', onKey);
-        return ()=> window.removeEventListener('keydown', onKey);
-      },[current,selected]);
-
-      return h('div',{className:"mx-auto max-w-3xl p-4 space-y-4"},
-        h('div',{className:"flex flex-wrap gap-2 items-end"},
-          h('div',{className:"grow"},
-            h('label',{className:"block text-sm mb-1"}, t('deckSelect')),
-            h('select',{multiple:true, size:3, className:"w-full rounded-xl border p-2 bg-white/70 dark:bg-slate-800/60",
-              value: params.deckIds, onChange:e=> { const opts=[...e.target.options].filter(o=>o.selected).map(o=>o.value); setParams(p=>({...p, deckIds:opts})); }},
-              decks.map(d=> h('option',{key:d.id, value:d.id}, d.name))
-            )
-          ),
-          h('div', null,
-            h('label',{className:"block text-sm mb-1"}, t('quiz')),
-            h('div',{className:"flex gap-2"},
-              h(Button,{onClick:()=>setParams(p=>({...p, mode:'A'}))}, t('modeA')),
-              h(Button,{onClick:()=>setParams(p=>({...p, mode:'B'}))}, t('modeB')),
-              h(Button,{onClick:()=>setParams(p=>({...p, mode:'mix'}))}, t('mixed')),
-            )
-          ),
-          h('div', null,
-            h('label',{className:"block text-sm mb-1"}, t('chooseCount')),
-            h('div',{className:"flex gap-2"},
-              h('input',{type:'number', min:1, className:"w-24 rounded-xl border px-3 py-2", value:params.limit||10, onChange:e=>setParams(p=>({...p, limit:Number(e.target.value)}))}),
-              h(Button,{onClick:()=>setParams(p=>({...p, limit:undefined}))}, t('unlimited'))
-            )
-          ),
-          h('div', null,
-            h('label',{className:"block text-sm mb-1"}, t('timer')),
-            h('input',{type:'number', min:0, className:"w-24 rounded-xl border px-3 py-2", value:params.timerSeconds||0, onChange:e=>setParams(p=>({...p, timerSeconds:Number(e.target.value)}))})
-          ),
-          h('div',{className:"flex items-center gap-2"},
-            h('label', null, h('input',{type:'checkbox', className:"mr-2", checked:params.sr, onChange:e=>setParams(p=>({...p, sr:e.target.checked}))}), t('sr'))
-          ),
-          h(Button,{onClick:start, className:"ml-auto"}, t('start'))
-        ),
-
-        current && h('div',{className:"rounded-2xl border bg-white/70 dark:bg-slate-800/40 p-4 space-y-3"},
-          h('div',{className:"text-xl font-semibold"}, current.prompt),
-          h('div',{className:"grid gap-3"},
-            current.options.map((opt,i)=> {
-              const isSel = selected===opt;
-              const isAns = current.answer===opt;
-              const state = selected? (isAns?'ring-2 ring-emerald-400 bg-emerald-50 dark:bg-emerald-900/30': isSel?'ring-2 ring-red-400 bg-red-50 dark:bg-red-900/30':'opacity-60')
-                                    : 'hover:bg-slate-100/60 dark:hover:bg-slate-800/60';
-              return h('button',{key:i, className:`text-left rounded-xl border p-3 focus-visible:ring-2 ${state}`, onClick:()=> submit(opt), 'aria-pressed': isSel},
-                h('div',{className:"text-sm opacity-70"}, (i+1)+'. '),
-                h('div',{className:"font-medium"}, opt)
-              )
-            })
-          ),
-          h('div',{className:"flex gap-2"},
-            h(Button,{onClick:()=> location.hash='#/'}, t('quit')),
-            h(Button,{onClick:next, disabled:!selected}, t('next')),
-            h('div',{className:"ml-auto text-xs text-slate-500"}, t('keyboard'))
-          ),
-          selected && h('div',{className:"rounded-lg bg-slate-100 dark:bg-slate-800 p-3 mt-2", role:'alert'}, current.explain)
-        ),
-
-        !current && h('div',{className:"text-sm text-slate-500"}, t('keyboard'))
-      );
-    };
-
-    const SettingsPage = () => {
-      const [s,setS] = React.useState(null);
-
-      React.useEffect(()=>{
-        (async()=>{
-          const st = await getSettings();
-          setS(st);
-          applyTheme(st.theme);
-        })();
-      },[]);
-
-      function applyTheme(mode){
-        const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const dark = mode==='dark' || (mode==='system' && sysDark);
-        document.body.dataset.theme = dark ? 'dark' : 'light';
-      }
-
-      if(!s) return h('div',{className:"p-4"},"Chargement…");
-
-      return h('div',{className:"mx-auto max-w-3xl p-4 space-y-4"},
-        h('h1',{className:"text-xl font-semibold"}, t('settings')),
-        h('div',{className:"rounded-xl border p-3 space-y-3"},
-          h('div',null,t('theme')),
-          h('div',{className:"flex gap-2"},
-            ['light','dark','system'].map(m=> h(Button,{key:m,onClick:async()=>{ const ns={...s, theme:m}; setS(ns); await saveSettings(ns); applyTheme(m); }}, t(m)))
-          )
-        )
-      );
-    };
-
-    const StatsPage = ({sessions,decks})=>{
-      const totalQ = sessions.reduce((a,b)=>a+b.questions,0);
-      const totalC = sessions.reduce((a,b)=>a+b.correct,0);
-      return h('div',{className:"mx-auto max-w-5xl p-4 space-y-4"},
-        h('h1',{className:"text-xl font-semibold"}, t('globalStats')),
-        h('div',{className:"grid sm:grid-cols-3 gap-3"},
-          h('div',{className:"rounded-xl border p-3"}, h('div',{className:"text-sm"}, t('questions')), h('div',{className:"text-2xl font-semibold"}, totalQ)),
-          h('div',{className:"rounded-xl border p-3"}, h('div',{className:"text-sm"}, t('score')), h('div',{className:"text-2xl font-semibold"}, totalQ? Math.round(100*totalC/totalQ)+'%':'—')),
-          h('div',{className:"rounded-xl border p-3"}, h('div',{className:"text-sm"}, t('avgTime')), h('div',{className:"text-2xl font-semibold"}, sessions.length? Math.round(sessions.reduce((a,b)=>a+b.avgTimeMs,0)/sessions.length)+' ms':'—')),
-        ),
-        h('div',{className:"rounded-xl border p-3"}, h('div',{className:"font-medium mb-2"}, "Plus ratés"),
-          h('ul',{className:"list-disc pl-5 space-y-1 text-sm"},
-            decks.flatMap(d=>d.cards).map(c=>{
-              const at=c.stats?.attempts||0, co=c.stats?.correct||0; const rate=at?co/at:1;
-              return {c,rate,at};
-            }).filter(x=>x.at>=3).sort((a,b)=> a.rate-b.rate).slice(0,10)
-             .map(x=> h('li',{key:x.c.id}, `${x.c.term}: ${Math.round(100*(x.rate))}%`))
-          )
-        )
-      );
-    };
-
-    // --- Import/Export
-    const ImportExport = ()=>{
-      const [preview,setPreview]=React.useState([]);
-      const [fileName,setFileName]=React.useState('');
-      const [strategy,setStrategy]=React.useState('merge');
-      const [deckName,setDeckName]=React.useState('Import');
-
-      async function onFile(e){
-        const f = e.target.files[0]; if(!f) return;
-        setFileName(f.name);
-        const txt = await f.text();
-        if(f.name.toLowerCase().endsWith('.json')){
-          const obj = JSON.parse(txt);
-          if (obj.decks) setPreview(obj.decks.flatMap(d=>d.cards||[]));
-          else if (Array.isArray(obj.cards)) setPreview(obj.cards);
-          setDeckName(obj.name || 'Import');
-        } else {
-          const lines = txt.replace(/\r/g,'').split('\n').filter(Boolean);
-          const head = lines.shift().split(/[;,]/).map(s=>s.trim().toLowerCase());
-          const rows = lines.map(line=>{
-            const delim = (line.match(/;/g)||[]).length>(line.match(/,/g)||[]).length?';':',';
-            const cells=[]; let cur='', q=false;
-            for(let i=0;i<line.length;i++){
-              const ch=line[i], ch2=line[i+1];
-              if(ch==='"' && q && ch2==='"'){ cur+='"'; i++; continue; }
-              if(ch==='"'){ q=!q; continue; }
-              if(ch===delim && !q){ cells.push(cur); cur=''; continue; }
-              cur+=ch;
-            } cells.push(cur);
-            const obj={}; head.forEach((h,i)=> obj[h]= (cells[i]||'').trim());
-            return obj;
-          });
-          setPreview(rows);
-          setDeckName((f.name||'Import').replace(/\.csv$/i,''));
-        }
-      }
-
-      async function doImport(){
-        if (!preview.length) return;
-        const toCards = preview.map(r=> ({
-          id: crypto.randomUUID(),
-          term: r.term || r.word || r.mot || '',
-          definition: r.definition || r['définition'] || '',
-          tags: typeof r.tags==='string' ? r.tags.split(/[;,]/).map(x=>x.trim()).filter(Boolean) : (Array.isArray(r.tags)?r.tags:[]),
-          createdAt: now(), updatedAt: now()
-        })).filter(c=> c.term && c.definition);
-        const decks = await loadDecks();
-        let deck = decks.find(d=> d.name===deckName);
-        if(!deck) deck = {id:crypto.randomUUID(), name:deckName, createdAt:now(), updatedAt:now(), cards:[]};
-        const exist = new Map(deck.cards.map(c=> [c.term+'||'+c.definition, c]));
-        let imported=0, merged=0, ignored=0;
-        for(const c of toCards){
-          const key = c.term+'||'+c.definition;
-          if(exist.has(key)){
-            if (strategy==='merge'){ const cur = exist.get(key); const tags=new Set([...(cur.tags||[]), ...(c.tags||[])]); cur.tags=[...tags]; cur.updatedAt=now(); merged++; }
-            else if (strategy==='overwrite'){ const cur = exist.get(key); Object.assign(cur, c); merged++; }
-            else ignored++;
-          } else { deck.cards.push(c); imported++; }
-        }
+    function start(){
+      if(pool.length<4){ alert(t('need4')); return; }
+      setSession({id:crypto.randomUUID(), startedAt:now(), deckIds:params.deckIds, questions:0, correct:0, avgTimeMs:0, items:[]});
+      setSelected(null);
+      setCurrent(makeQuestion(pool, params));
+    }
+    async function record(cardId, ok, timeMs){
+      setSession(s=>{
+        const items=[...(s?.items||[]), {cardId, correct:ok, timeMs}];
+        const questions=(s?.questions||0)+1;
+        const correct=(s?.correct||0)+(ok?1:0);
+        const avgTimeMs=Math.round(((s?.avgTimeMs||0)*(questions-1)+timeMs)/questions);
+        return {...(s||{}), items, questions, correct, avgTimeMs};
+      });
+      const deck = decks.find(d=> d.cards.some(c=>c.id===cardId));
+      if(deck){ const c = deck.cards.find(x=>x.id===cardId);
+        c.stats = initStats(c.stats);
+        c.stats.attempts++; if(ok) c.stats.correct++;
+        c.stats.lastSeen = now();
+        c.stats = updateSM2(c.stats, ok?5:0);
         await saveDeck(deck);
-        alert(`Import OK\nNouvelles: ${imported}\nFusionnées: ${merged}\nIgnorées: ${ignored}`);
-        setPreview([]); setFileName('');
       }
+    }
+    let startTime = now();
+    function submit(choice){
+      if(!current || selected) return;
+      const ok = (choice===current.answer);
+      setSelected(choice);
+      live.textContent = ok? t('correct') : t('incorrect');
+      record(current.cardId, ok, now()-startTime);
+    }
+    function next(){ setSelected(null); setCurrent(makeQuestion(pool, params)); startTime=now(); }
+    React.useEffect(()=>{
+      const onKey=(ev)=>{ if(!current) return; if(/^[1-4]$/.test(ev.key)){ submit(current.options[Number(ev.key)-1]); } if(ev.key==='Enter'||ev.key.toLowerCase()==='n'){ if(selected) next(); } };
+      window.addEventListener('keydown',onKey); return()=>window.removeEventListener('keydown',onKey);
+    },[current,selected]);
 
-      async function exportAllJSON(){
-        const decks = await loadDecks();
-        const blob = new Blob([JSON.stringify({decks}, null, 2)], {type:'application/json'});
-        const url = URL.createObjectURL(blob);
-        const a=document.createElement('a'); a.href=url; a.download='quizdefs-export.json'; a.click(); URL.revokeObjectURL(url);
-      }
-      async function exportDeckCSV(){
-        const decks = await loadDecks(); const deck=decks[0]; if(!deck){ alert('Aucun deck'); return; }
-        const rows = deck.cards.map(c=> ({term:c.term, definition:c.definition, tags:(c.tags||[]).join(';')}));
-        const csv = toCSV(rows);
-        const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
-        const url = URL.createObjectURL(blob);
-        const a=document.createElement('a'); a.href=url; a.download=deck.name+'.csv'; a.click(); URL.revokeObjectURL(url);
-      }
-      function downloadDemoCSV(){
-        const csv = `term,definition,tags
-Osmose,Passage de solvant à travers une membrane semi-perméable,biologie
-Entropie,Mesure du désordre d'un système,physique;thermo
-API,Interface permettant à deux logiciels de communiquer,informatique`;
-        const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob);
-        const a=document.createElement('a'); a.href=url; a.download='exemple.csv'; a.click(); URL.revokeObjectURL(url);
-      }
-
-      return h('div',{className:"mx-auto max-w-4xl p-4 space-y-4"},
-        h('h1',{className:"text-xl font-semibold"}, t('importExport')),
-        h('div',{className:"rounded-xl border p-3 space-y-2"},
-          h('input',{type:'file', accept:'.csv,.json', onChange:onFile}),
-          fileName && h('div',{className:"text-sm text-slate-500"}, fileName),
-          h('div',{className:"flex gap-2 items-center"},
-            h('span',null,t('duplicates')+':'),
-            ['merge','overwrite','ignore'].map(k=> h('label',{key:k,className:"flex items-center gap-1"},
-              h('input',{type:'radio',name:'dup', defaultChecked:k==='merge', onChange:()=>setStrategy(k)}), t(k)
-            ))
-          ),
-          h('div',{className:"flex gap-2"},
-            h('input',{className:"rounded-xl border px-3 py-2", value:deckName, onChange:e=>setDeckName(e.target.value)}),
-            h(Button,{onClick:doImport}, t('import')),
-            h(Button,{onClick:exportAllJSON}, t('export')+' JSON'),
-            h(Button,{onClick:exportDeckCSV}, t('export')+' CSV'),
-            h(Button,{onClick:downloadDemoCSV}, 'Exemple CSV'),
-          ),
-          preview.length>0 && h('div',{className:"max-h-[40vh] overflow-auto text-sm"},
-            h('table',{className:"w-full"},
-              h('thead',null,h('tr',null,['term','definition','tags'].map(hd=>h('th',{key:hd,className:"text-left p-1 border-b"},hd)))),
-              h('tbody',null, preview.slice(0,20).map((r,i)=> h('tr',{key:i},
-                h('td',{className:"p-1 border-b align-top"}, r.term||r.word||r.mot),
-                h('td',{className:"p-1 border-b align-top"}, r.definition||r['définition']),
-                h('td',{className:"p-1 border-b align-top"}, r.tags)
-              )))
-            )
+    return h('div',{className:"mx-auto max-w-3xl p-4 space-y-4"},
+      h('div',{className:"flex flex-wrap gap-2 items-end"},
+        h('div',{className:"grow"},
+          h('label',{className:"block text-sm mb-1"}, t('deckSelect')),
+          h('select',{multiple:true, size:3, className:"w-full rounded-xl border p-2 bg-white/70 dark:bg-slate-800/60",
+            value: params.deckIds, onChange:e=>{ const opts=[...e.target.options].filter(o=>o.selected).map(o=>o.value); setParams(p=>({...p, deckIds:opts})); }},
+            decks.map(d=> h('option',{key:d.id,value:d.id}, d.name))
           )
+        ),
+        h('div', null,
+          h('label',{className:"block text-sm mb-1"}, t('quiz')),
+          h('div',{className:"flex gap-2"},
+            h(Button,{onClick:()=>setParams(p=>({...p, mode:'A'}))}, t('modeA')),
+            h(Button,{onClick:()=>setParams(p=>({...p, mode:'B'}))}, t('modeB')),
+            h(Button,{onClick:()=>setParams(p=>({...p, mode:'mix'}))}, t('mixed')),
+          )
+        ),
+        h('div', null,
+          h('label',{className:"block text-sm mb-1"}, t('chooseCount')),
+          h('div',{className:"flex gap-2"},
+            h('input',{type:'number', min:1, className:"w-24 rounded-xl border px-3 py-2", value:params.limit||10, onChange:e=>setParams(p=>({...p, limit:Number(e.target.value)}))}),
+            h(Button,{onClick:()=>setParams(p=>({...p, limit:undefined}))}, t('unlimited'))
+          )
+        ),
+        h('div', null,
+          h('label',{className:"block text-sm mb-1"}, t('timer')),
+          h('input',{type:'number', min:0, className:"w-24 rounded-xl border px-3 py-2", value:params.timerSeconds||0, onChange:e=>setParams(p=>({...p, timerSeconds:Number(e.target.value)}))})
+        ),
+        h('div',{className:"flex items-center gap-2"},
+          h('span',null,t('quickPick')+':'),
+          h(Button,{onClick:()=>quickPick('defs')}, t('definitions')),
+          h(Button,{onClick:()=>quickPick('concepts')}, t('concepts')),
+          h(Button,{onClick:()=>quickPick('all')}, t('all')),
+        ),
+        h(Button,{onClick:start, className:"ml-auto"}, t('start'))
+      ),
+      current && h('div',{className:"rounded-2xl border bg-white/70 dark:bg-slate-800/40 p-4 space-y-3"},
+        h('div',{className:"text-xl font-semibold"}, current.prompt),
+        h('div',{className:"grid gap-3"},
+          current.options.map((opt,i)=>{
+            const isSel = selected===opt; const isAns=current.answer===opt;
+            const state = selected? (isAns?'ring-2 ring-emerald-400 bg-emerald-50 dark:bg-emerald-900/30': isSel?'ring-2 ring-red-400 bg-red-50 dark:bg-red-900/30':'opacity-60') : 'hover:bg-slate-100/60 dark:hover:bg-slate-800/60';
+            return h('button',{key:i, className:`text-left rounded-xl border p-3 focus-visible:ring-2 ${state}`, onClick:()=>submit(opt), 'aria-pressed':isSel},
+              h('div',{className:"text-sm opacity-70"}, (i+1)+'. '), h('div',{className:"font-medium"}, opt)
+            );
+          })
+        ),
+        h('div',{className:"flex gap-2"},
+          h(Button,{onClick:()=> location.hash='#/'}, t('quit')),
+          h(Button,{onClick:next, disabled:!selected}, t('next')),
+          h('div',{className:"ml-auto text-xs text-slate-500"}, t('keyboard'))
+        ),
+        selected && h('div',{className:"rounded-lg bg-slate-100 dark:bg-slate-800 p-3 mt-2", role:'alert'}, current.explain)
+      ),
+      !current && h('div',{className:"text-sm text-slate-500"}, t('keyboard'))
+    );
+  };
+
+  const SettingsPage = ()=>{
+    const [s,setS]=React.useState(null);
+    React.useEffect(()=>{ (async()=>{ const st=await getSettings(); setS(st); applyTheme(st.theme); })(); },[]);
+    function applyTheme(mode){
+      const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const dark = mode==='dark' || (mode==='system' && sysDark);
+      document.body.dataset.theme = dark? 'dark':'light';
+    }
+    if(!s) return h('div',{className:"p-4"},"Chargement…");
+    return h('div',{className:"mx-auto max-w-3xl p-4 space-y-4"},
+      h('h1',{className:"text-xl font-semibold"}, t('settings')),
+      h('div',{className:"rounded-xl border p-3 space-y-3"},
+        h('div',null,t('theme')),
+        h('div',{className:"flex gap-2"},
+          ['light','dark','system'].map(m=> h(Button,{key:m,onClick:async()=>{ const ns={...s,theme:m}; setS(ns); await saveSettings(ns); applyTheme(m); }}, t(m)))
         )
-      );
-    };
+      )
+    );
+  };
 
-    // --- Shell + routes
-    const App = ()=>{
-      const [route, go] = useHashRoute();
-      const [decks, setDecks] = React.useState([]);
-      const [sessions, setSessions] = React.useState([]);
-      async function reload(){ setDecks(await loadDecks()); setSessions(await idb.all(DB,'sessions')); }
-      React.useEffect(()=>{ reload(); },[]);
-      return h('div', null,
-        h(Nav,{go}),
-        route==='/' && h(Home,{go}),
-        route==='/decks' && h(DecksPage,{go, decks, reload}),
-        route==='/decks/:id' && (()=>{ const id=(new URLSearchParams(location.hash.split('?')[1]||'')).get('id'); return h(DeckDetail,{deckId:id, reload}); })(),
-        route==='/quiz' && h(QuizPage,{decks}),
-        route==='/import-export' && h(ImportExport,{}),
-        route==='/settings' && h(SettingsPage,{}),
-        route==='/stats' && h(StatsPage,{sessions,decks}),
-        route==='/help' && h('div',{className:"mx-auto max-w-3xl p-4"}, h('h1',{className:"text-xl font-semibold"},"Aide/Docs"),
-          h('p',null,"Importer CSV: colonnes term,definition,tags. Export JSON/CSV disponibles. Données stockées localement.")),
-      );
-    };
+  const StatsPage = ({sessions,decks})=>{
+    const totalQ = sessions.reduce((a,b)=>a+b.questions,0);
+    const totalC = sessions.reduce((a,b)=>a+b.correct,0);
+    return h('div',{className:"mx-auto max-w-5xl p-4 space-y-4"},
+      h('h1',{className:"text-xl font-semibold"},"Statistiques"),
+      h('div',{className:"grid sm:grid-cols-3 gap-3"},
+        h('div',{className:"rounded-xl border p-3"}, h('div',{className:"text-sm"}, "Questions"), h('div',{className:"text-2xl font-semibold"}, totalQ)),
+        h('div',{className:"rounded-xl border p-3"}, h('div',{className:"text-sm"}, "Score"), h('div',{className:"text-2xl font-semibold"}, totalQ? Math.round(100*totalC/totalQ)+'%':'—')),
+        h('div',{className:"rounded-xl border p-3"}, h('div',{className:"text-sm"}, "Temps moyen"), h('div',{className:"text-2xl font-semibold"}, sessions.length? Math.round(sessions.reduce((a,b)=>a+b.avgTimeMs,0)/sessions.length)+' ms':'—')),
+      )
+    );
+  };
 
-    // --- boot
-    (async function(){
-      DB = await idb.open();
-      await ensureSeed();
-      const root = ReactDOM.createRoot(document.getElementById('app'));
-      root.render(h(App));
-    })();
+  const App = ()=>{
+    const [route,go]=useHashRoute();
+    const [decks,setDecks]=React.useState([]);
+    const [sessions,setSessions]=React.useState([]);
+    async function reload(){ setDecks(await loadDecks()); setSessions(await idb.all(DB,'sessions')); }
+    React.useEffect(()=>{ reload(); },[]);
+    return h('div',null,
+      h(Nav,{go}),
+      route==='/' && h(Home,{go}),
+      route==='/decks' && h(DecksPage,{go,decks,reload}),
+      route==='/decks/:id' && ( ()=>{ const id=(new URLSearchParams(location.hash.split('?')[1]||'')).get('id'); return h(DeckDetail,{deckId:id}); })(),
+      route==='/quiz' && h(QuizPage,{decks}),
+      route==='/settings' && h(SettingsPage,{}),
+      route==='/stats' && h(StatsPage,{sessions,decks}),
+      route==='/help' && h('div',{className:"mx-auto max-w-3xl p-4 space-y-3"},
+        h('h1',{className:"text-xl font-semibold"},"Aide rapide"),
+        h('ul',{className:"list-disc pl-5 space-y-1 text-sm"},
+          h('li',null,"Choisis « Défs », « Concepts » ou « Tout » via les boutons rapides du Quiz."),
+          h('li',null,"Mode du quiz : Définition→Mot (par défaut), Mot→Définition ou Mixte."),
+          h('li',null,"Les données sont locales (IndexedDB). Tu peux ajouter tes propres cartes dans « Decks »."),
+        )
+      )
+    );
+  };
+
+  (async function(){
+    DB = await idb.open();
+    await ensureSeed();
+    const root = ReactDOM.createRoot(document.getElementById('app'));
+    root.render(h(App));
   })();
-  </script>
+})();
+</script>
 </body>
 </html>
