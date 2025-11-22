@@ -1,428 +1,480 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <title>SC04 — Quiz Définitions & Concepts</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio - Thomas Debauge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap');
 
-  <!-- Tailwind + React (CDN) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config = { darkMode: ['class','[data-theme="dark"]'] };</script>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            scroll-behavior: smooth;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+        }
 
-  <style>
-    :focus-visible{outline:2px solid #22c55e;outline-offset:2px}
-    .visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
-    #err{position:fixed;inset:auto 0 0 0;background:#111;color:#fff;padding:.5rem .75rem;font:12px/1.4 ui-monospace,monospace;display:none}
-    #err.show{display:block}
-  </style>
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: #2563eb; /* Bleu roi */
+            margin-top: 10px;
+            border-radius: 2px;
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #e5e7eb;
+        }
+
+        .hover-scale {
+            transition: transform 0.3s ease;
+        }
+        .hover-scale:hover {
+            transform: translateY(-5px);
+        }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 min-h-screen" data-theme="light">
-  <div id="app" class="min-h-screen"></div>
-  <div id="live" class="visually-hidden" role="status" aria-live="polite"></div>
-  <pre id="err"></pre>
+<body class="bg-slate-50 text-gray-800 antialiased">
 
-<script>
-(function(){
-  const h = React.createElement;
-  const $ = s => document.querySelector(s);
-  const now = () => Date.now();
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 font-bold text-2xl tracking-tight text-slate-900">
+                    TD<span class="text-blue-600">.</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="#home" class="hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Accueil</a>
+                        <a href="#about" class="hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Profil</a>
+                        <a href="#experience" class="hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Expérience</a>
+                        <a href="#projects" class="hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Projets</a>
+                        <a href="#skills" class="hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Compétences</a>
+                        <a href="#contact" class="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-full text-sm font-medium transition-colors shadow-md">Contact</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-  // --- mini overlay erreurs
-  const err = (e)=>{ const n=$('#err'); n.textContent=(n.textContent?n.textContent+"\n":'')+(e&&e.stack||e); n.classList.add('show'); console.error(e); };
-  window.addEventListener('error', e=>err(e.error||e.message));
-  window.addEventListener('unhandledrejection', e=>err(e.reason||e));
+    <!-- Hero Section -->
+    <section id="home" class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-slate-900 text-white">
+        <div class="absolute inset-0 opacity-20">
+             <!-- Placeholder pour un fond abstrait ou technique si désiré -->
+            <div class="absolute right-0 top-0 bg-blue-600 w-96 h-96 rounded-full filter blur-[120px] opacity-30"></div>
+            <div class="absolute left-0 bottom-0 bg-indigo-600 w-96 h-96 rounded-full filter blur-[120px] opacity-30"></div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center lg:text-left grid lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-blue-400 font-semibold tracking-wide uppercase mb-4 text-sm">Ingénierie Mécanique & Design</h2>
+                    <h1 class="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
+                        Thomas <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Debauge</span>
+                    </h1>
+                    <p class="text-xl text-gray-300 mb-8 font-light max-w-2xl mx-auto lg:mx-0">
+                        Élève Ingénieur en Génie Mécanique passionné par la conception, le prototypage et l'innovation. À la recherche d'un stage Assistant Ingénieur.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <a href="#contact" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition-all shadow-lg hover:shadow-blue-500/25 text-center">
+                            Me Contacter
+                        </a>
+                        <a href="#projects" class="px-8 py-3 border border-gray-600 hover:border-white hover:bg-white/5 rounded-lg font-semibold transition-all text-center">
+                            Voir mes projets
+                        </a>
+                    </div>
+                </div>
+                <!-- Image Hero -->
+                <div class="relative hidden lg:block">
+                    <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-700 transform rotate-2 hover:rotate-0 transition-transform duration-500">
+                        <!-- PLACEHOLDER: Remplacez 'vue face grand angle.jpg' par le chemin correct si nécessaire -->
+                        <img src="vue face grand angle.jpg" alt="Rendu 3D Conception Automobile" class="w-full h-auto object-cover" onerror="this.src='https://placehold.co/600x400/1e293b/white?text=Rendu+3D+Automobile'">
+                    </div>
+                    <!-- Floating Card -->
+                    <div class="absolute -bottom-6 -left-6 bg-white text-slate-900 p-4 rounded-xl shadow-xl max-w-xs animate-bounce" style="animation-duration: 3s;">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-blue-100 p-2 rounded-lg text-blue-600">
+                                <i class="fas fa-cube text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-sm">Expertise 3D</p>
+                                <p class="text-xs text-gray-500">Blender, CATIA, Fusion 360</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  // --- IndexedDB minimal
-  const idb = {
-    open(name='defs-quiz-db', v=2){
-      return new Promise((res,rej)=>{
-        const r = indexedDB.open(name, v);
-        r.onupgradeneeded = ()=> {
-          const db=r.result;
-          if(!db.objectStoreNames.contains('decks')) db.createObjectStore('decks',{keyPath:'id'});
-          if(!db.objectStoreNames.contains('settings')) db.createObjectStore('settings',{keyPath:'id'});
-          if(!db.objectStoreNames.contains('sessions')) db.createObjectStore('sessions',{keyPath:'id'});
-        };
-        r.onsuccess=()=>res(r.result);
-        r.onerror =()=>rej(r.error);
-      });
-    },
-    async put(db,store,val){await new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite'); tx.objectStore(store).put(val).onsuccess=()=>res(); tx.onerror=()=>rej(tx.error);});},
-    async get(db,store,key){return new Promise((res,rej)=>{const tx=db.transaction(store,'readonly'); tx.objectStore(store).get(key).onsuccess=e=>res(e.target.result); tx.onerror=()=>rej(tx.error);});},
-    async all(db,store){return new Promise((res,rej)=>{const tx=db.transaction(store,'readonly'); tx.objectStore(store).getAll().onsuccess=e=>res(e.target.result); tx.onerror=()=>rej(tx.error);});},
-    async del(db,store,key){await new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite'); tx.objectStore(store).delete(key).onsuccess=()=>res(); tx.onerror=()=>rej(tx.error);});},
-  };
+    <!-- Presentation Section -->
+    <section id="about" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-16">
+                <h2 class="text-3xl font-bold text-slate-900 section-title">Présentation Personnelle</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-12">
+                <div class="md:col-span-2 text-gray-600 leading-relaxed space-y-6">
+                    <p>
+                        Actuellement étudiant en <strong class="text-slate-900">Génie Mécanique à l'Université de Technologie de Troyes (UTT)</strong>, je suis un futur ingénieur passionné par la concrétisation d'idées techniques. Mon parcours académique, enrichi par une année de PASS (médecine) qui m'a inculqué rigueur et résilience, se combine aujourd'hui avec ma passion pour le design et la mécanique.
+                    </p>
+                    <p>
+                        Au-delà de la théorie, je suis un "maker". Que ce soit à travers la <strong class="text-slate-900">conception de châssis pour la Formula Student</strong>, la réalisation de prototypes fonctionnels en impression 3D, ou la création artistique numérique, je cherche constamment à allier esthétique et fonctionnalité.
+                    </p>
+                    <p>
+                        Je suis à la recherche d'un stage en tant qu'Assistant Ingénieur pour mettre à profit ma créativité technique, ma maîtrise des outils de CAO et mon dynamisme au sein d'une équipe innovante.
+                    </p>
+                </div>
+                
+                <!-- Quick Stats / Highlights -->
+                <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100">
+                    <h3 class="font-bold text-lg mb-6 text-slate-900">Points Clés</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <i class="fas fa-graduation-cap text-blue-600 mt-1 mr-3"></i>
+                            <div>
+                                <span class="block font-medium text-slate-900">Formation Ingénieur</span>
+                                <span class="text-sm text-gray-500">UTT - Génie Mécanique (2023-2028)</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-globe-europe text-blue-600 mt-1 mr-3"></i>
+                            <div>
+                                <span class="block font-medium text-slate-900">Mobilité Internationale</span>
+                                <span class="text-sm text-gray-500">Semestre à Sofia, Bulgarie (2025)</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-language text-blue-600 mt-1 mr-3"></i>
+                            <div>
+                                <span class="block font-medium text-slate-900">Langues</span>
+                                <span class="text-sm text-gray-500">Anglais (C1), Espagnol (B1)</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  // --- utils
-  const rand = n => Math.floor(Math.random()*n);
-  const shuffle = a => {a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=rand(i+1); [a[i],a[j]]=[a[j],a[i]] } return a;};
-  const levenshtein = (a,b)=>{ const m=a.length,n=b.length,dp=Array.from({length:m+1},()=>Array(n+1).fill(0)); for(let i=0;i<=m;i++) dp[i][0]=i; for(let j=0;j<=n;j++) dp[0][j]=j; for(let i=1;i<=m;i++) for(let j=1;j<=n;j++){ const c=a[i-1]===b[j-1]?0:1; dp[i][j]=Math.min(dp[i-1][j]+1,dp[i][j-1]+1,dp[i-1][j-1]+c);} return dp[m][n]; };
-  const textSim = (a,b)=>{ const sa=new Set(a.toLowerCase().split(/\W+/).filter(Boolean)); const sb=new Set(b.toLowerCase().split(/\W+/).filter(Boolean)); const inter=[...sa].filter(x=>sb.has(x)).length; const union=new Set([...sa,...sb]).size||1; return inter/union; };
+    <!-- Experience Section -->
+    <section id="experience" class="py-20 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-16">
+                <h2 class="text-3xl font-bold text-slate-900 section-title">Expériences Professionnelles</h2>
+            </div>
 
-  // --- i18n
-  const t=(k)=>({
-    appTitle:'SC04 — Quiz',
-    decks:'Decks', quiz:'Quiz', stats:'Stats', settings:'Réglages', importExport:'Import / Export', help:'Aide/Docs',
-    createDeck:'Créer un deck', rename:'Renommer', duplicate:'Dupliquer', delete:'Supprimer',
-    addCard:'Ajouter une carte', term:'Mot', definition:'Définition', tags:'Tags',
-    deckSelect:'Sélectionner un ou plusieurs decks', modeA:'Définition → Mot', modeB:'Mot → Définition', mixed:'Mixte',
-    chooseCount:'Nombre de questions', unlimited:'Illimité', timer:'Minuteur', sr:'Répétition espacée',
-    start:'Démarrer', next:'Question suivante', quit:'Quitter', correct:'Correct', incorrect:'Incorrect',
-    keyboard:'Raccourcis : 1–4 (choix) • Entrée (valider) • N (suiv.)',
-    need4:'Ajoute au moins 4 cartes dans ce deck pour lancer un quiz.',
-    definitions:'Définitions', concepts:'Concepts', all:'Tout',
-    quickPick:'Sélection rapide', theme:'Thème',
-    light:'Clair', dark:'Sombre', system:'Système'
-  }[k]||k);
+            <div class="space-y-8">
+                <!-- Exp 1 -->
+                <div class="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow border-l-4 border-blue-600">
+                    <div class="flex flex-col md:flex-row justify-between md:items-center mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">Stage Ouvrier Bâtiment</h3>
+                            <p class="text-blue-600 font-medium">Société MVP - Valenton</p>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-400 bg-gray-100 px-3 py-1 rounded-full mt-2 md:mt-0 w-fit">Juillet 2024</span>
+                    </div>
+                    <p class="text-gray-600 mb-4 italic">Immersion terrain et travail manuel.</p>
+                    <ul class="list-disc list-inside text-gray-600 space-y-1 marker:text-blue-600">
+                        <li>Travail en équipe pour la réalisation de rénovations et de constructions.</li>
+                        <li>Assistance technique et opérationnelle au chef de chantier.</li>
+                        <li>Développement de l'endurance et de la compréhension des contraintes terrain.</li>
+                    </ul>
+                </div>
 
-  // --- DATA (extrait de tes CM)
-  function deck(id,name,cards){ return {id, name, createdAt:now(), updatedAt:now(), cards}; }
-  function card(term,definition,tags=[]){ return { id:crypto.randomUUID(), term, definition, tags, createdAt:now(), updatedAt:now() }; }
+                <!-- Exp 2 -->
+                <div class="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow border-l-4 border-blue-600">
+                    <div class="flex flex-col md:flex-row justify-between md:items-center mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">Assistant Chef de Projet</h3>
+                            <p class="text-blue-600 font-medium">Cosmyx - Epinay</p>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-400 bg-gray-100 px-3 py-1 rounded-full mt-2 md:mt-0 w-fit">Juillet 2021</span>
+                    </div>
+                    <p class="text-gray-600 mb-4 italic">Spécialisation en Fabrication Additive.</p>
+                    <ul class="list-disc list-inside text-gray-600 space-y-1 marker:text-blue-600">
+                        <li>Conception et fabrication de pièces techniques en impression 3D.</li>
+                        <li>Maintenance et gestion d'un parc d'imprimantes 3D.</li>
+                        <li>Gestion de projet : du besoin client à la livraison du prototype.</li>
+                    </ul>
+                </div>
 
-  const DECK_DEFS = deck('deck-defs','Définitions SC04',[
-    card('Psychologie', "Science visant à comprendre la structure et le fonctionnement de l’activité mentale et des comportements associés.", ['CM1','Déf.']), // CM1b
-    card('Communication', "Transmission d’un message entre individus via un code et un média, pour atteindre un but.", ['CM1','Déf.']),
-    card('Persuasion', "Modification de l’intériorité (pensée, jugement…) par un message (discours, texte…).", ['CM1','Déf.']),
-    card('Communication non verbale', "Ensemble des comportements de communication autres que les paroles, produits intentionnellement ou non.", ['CM2','Non verbal']),
-    card('Émotion', "Affect bref lié à un déclencheur identifiable, orienté vers un objet, avec trois composantes : sensations physiques, représentations mentales, réponses motrices.", ['CM3','Émotions']),
-    card('Groupe (définition minimale)', "Collection d’individus en même temps/lieu, en interaction et interdépendants, avec une raison d’être ensemble.", ['CM5','Groupes']),
-    card('Identité sociale', "Partie du concept de soi issue de l’appartenance à des groupes, avec valeur et signification émotionnelle associées.", ['CM5','Identité']),
-    card('Catégorisation sociale', "Distinction endogroupe (« nous ») / exogroupe (« eux ») accompagnée d’assimilation intra-groupe et de contraste inter-groupes.", ['CM5','Identité']),
-    card('Obéissance', "Modification du comportement pour se soumettre à l’ordre d’une autorité légitime (ou perçue comme telle).", ['CM4','Influence']),
-    card('Expérimentation (méthode)', "Recréer en situation contrôlée un phénomène pour en identifier les causes via VI/VD.", ['CM1','Méthodes']),
-    card('Observation (méthode)', "Décrire le réel (gestes, documents, etc.) dans son contexte.", ['CM1','Méthodes']),
-    card('Entretien (méthode)', "Recueillir des informations dans un cadre spécifié (directif/non), voire provoquer un changement.", ['CM1','Méthodes']),
-    card('Questionnaire (méthode)', "Suite organisée d’items présentés aux participants (en face à face ou non).", ['CM1','Méthodes']),
-    card('Tests (méthode)', "Exercices fournissant des renseignements techniques/intellectuels/psychiques pour évaluer/orienter.", ['CM1','Méthodes']),
-    card('Sociométrie', "Technique qui repère la dynamique socio-affective (attraction/rejet) et la cohésion d’un groupe.", ['CM6','Dynamique']),
-    card('Rôle (en groupe)', "Ensemble des conduites caractéristiques attendues dans une situation donnée ; lié à la participation et à l’influence.", ['CM6','Bales']),
-    card('Statut (en groupe)', "Position institutionnelle avec droits et devoirs associés ; distinct du rôle.", ['CM6','Bales']),
-  ]);
+                <!-- Exp 3 -->
+                <div class="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow border-l-4 border-gray-300">
+                    <div class="flex flex-col md:flex-row justify-between md:items-center mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900">Stage d'Observation</h3>
+                            <p class="text-blue-600 font-medium">Polyrepro - Sèvres</p>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-400 bg-gray-100 px-3 py-1 rounded-full mt-2 md:mt-0 w-fit">Juin 2019</span>
+                    </div>
+                    <ul class="list-disc list-inside text-gray-600 space-y-1 marker:text-blue-600">
+                        <li>Observation des processus industriels de prototypage rapide.</li>
+                        <li>Découverte des technologies HP (SLA et SLS).</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  const DECK_CONCEPTS = deck('deck-concepts','Concepts & théories SC04',[
-    card('Approche catégorielle des émotions (Ekman)', "6 émotions de base (joie, peur, tristesse, colère, surprise, dégoût) + émotions secondaires influencées par la culture.", ['CM3','Émotions']),
-    card('Contrôle de l’expression émotionnelle', "Trois stratégies : diminuer, augmenter, masquer/substituer l’émotion (apprentissage des normes).", ['CM3','Émotions']),
-    card('Kinèmes (Birdwhistell)', "Découpage descriptif des comportements non verbaux en unités observables.", ['CM2','Non verbal']),
-    card('Typologie fonctionnelle (Cosnier)', "Gestes illustratifs/expressifs/paraverbaux/synchronisateurs, quasi-linguistiques ; et gestes extra-communicatifs.", ['CM2','Non verbal']),
-    card('Polysémie du regard', "Recherche d’info, attraction/évitement, gestion des tours de parole et de la référence.", ['CM2','Non verbal']),
-    card('Effet caméléon', "Imitation non verbale favorise l’interaction et rend l’imitateur plus apprécié.", ['CM2','Non verbal']),
-    card('Accommodation (Giles)', "Ajustement du style de communication pour se rapprocher/s’éloigner de l’interlocuteur.", ['CM2','Non verbal']),
-    card('Formation d’impression (Asch, 1946)', "Impression d’autrui rapide, inévitable, à partir de peu d’indices.", ['CM3','Apparence']),
-    card('Influence majoritaire', "Dépendance normative : examen superficiel, conformité sans adoption profonde.", ['CM4','Influence']),
-    card('Influence minoritaire', "Dépendance informationnelle : conflit cognitif, examen approfondi ; influence différée/latente.", ['CM4','Influence']),
-    card('Conditions influence minoritaire (Moscovici)', "Reconnaissance sociale, consistance, faible cohésion majoritaire, investissement, autonomie…", ['CM4','Influence']),
-    card('Polarisation de groupe', "Discussion/prise de décision rendent les positions plus extrêmes dans le sens initial.", ['CM4','Décision']),
-    card('Théorie des conflits réels (Sherif)', "Compétition pour ressources limitées → préjugés/discrimination ; buts supra-ordonnés réduisent l’hostilité.", ['CM5','Intergroupes']),
-    card('Paradigme des groupes minimaux', "Catégorisation arbitraire suffit à produire favoritisme intra-groupe et différenciation.", ['CM5','Intergroupes']),
-    card('Réactance (Brehm)', "Réaction négative à la contrainte perçue → baisse de l’impact persuasif.", ['CM7','Persuasion']),
-    card('Source : attractivité/ crédibilité', "Être perçu comme attirant/compétent accroît l’influence.", ['CM7','Persuasion']),
-    card('Message : unilatéral vs bilatéral', "Unilatéral efficace si opposition forte/faible instruction ; bilatéral si opposition faible/instruction forte.", ['CM7','Persuasion']),
-    card('Message : conclusion explicite', "Formuler la conclusion peut renforcer l’effet selon contexte et public.", ['CM7','Persuasion']),
-    card('Vision de Lewin C=f(P,E)', "Comportement fonction de la personne et de l’environnement ; groupe comme champ dynamique, objectifs partagés, interdépendance.", ['CM6','Lewin']),
-    card('Rôles/leadership (Bales)', "Rôles émergent avec la participation ; leadership et structure influent sur performance/satisfaction.", ['CM6','Bales']),
-  ]);
+    <!-- Projects Section -->
+    <section id="projects" class="py-20 bg-slate-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-16 text-white">
+                <h2 class="text-3xl font-bold section-title after:bg-blue-500">Réalisations Marquantes</h2>
+                <p class="mt-4 text-gray-400">Une sélection de mes projets techniques et créatifs.</p>
+            </div>
 
-  // --- paramètres / seed
-  const defaultSettings = { id:'app', theme:'system', sr:true, timerSeconds:0, language:'fr', masteredThreshold:0.85 };
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <!-- Project Card 1 -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden hover-scale shadow-lg border border-slate-700 flex flex-col">
+                    <div class="h-48 overflow-hidden bg-gray-700 relative group">
+                        <!-- PLACEHOLDER: Image de la F1 (Untitled.jpg) -->
+                        <img src="Untitled.jpg" alt="Châssis Formula Student" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://placehold.co/600x400/334155/white?text=Formula+Student'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent opacity-60"></div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <div class="mb-auto">
+                            <div class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">Automobile</div>
+                            <h3 class="text-xl font-bold mb-2">Troyes Racing Team</h3>
+                            <p class="text-gray-400 text-sm mb-4">
+                                Pôle Châssis. Conception et réalisation du châssis pour la Formula Student 2026. Travail collaboratif au sein d'une équipe de 50 membres.
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-slate-700 flex justify-between items-center">
+                            <span class="text-xs text-gray-500">En cours</span>
+                            <i class="fas fa-car text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
 
-  let DB;
-  async function loadDecks(){ return await idb.all(DB,'decks'); }
-  async function saveDeck(d){ d.updatedAt=now(); await idb.put(DB,'decks',d); }
-  async function getSettings(){ return await idb.get(DB,'settings','app') || defaultSettings; }
-  async function saveSettings(s){ await idb.put(DB,'settings',{...defaultSettings,...(s||{})}); }
-  async function ensureSeed(){
-    const decks = await loadDecks();
-    if (!decks.length){
-      await saveDeck(JSON.parse(JSON.stringify(DECK_DEFS)));
-      await saveDeck(JSON.parse(JSON.stringify(DECK_CONCEPTS)));
-      await saveSettings(defaultSettings);
-    }
-  }
+                <!-- Project Card 2 -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden hover-scale shadow-lg border border-slate-700 flex flex-col">
+                    <div class="h-48 overflow-hidden bg-gray-700 relative group">
+                        <!-- PLACEHOLDER: Image Vue côté (vue coté.jpg) -->
+                        <img src="vue coté.jpg" alt="Projet 3D" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://placehold.co/600x400/334155/white?text=Conception+3D'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent opacity-60"></div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <div class="mb-auto">
+                            <div class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">Innovation</div>
+                            <h3 class="text-xl font-bold mb-2">Prototype Bidet Amovible</h3>
+                            <p class="text-gray-400 text-sm mb-4">
+                                Projet complet : étude des besoins, design, choix des matériaux et techniques de fabrication. Travail d'équipe pluridisciplinaire.
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-slate-700 flex justify-between items-center">
+                            <span class="text-xs text-gray-500">2024</span>
+                            <i class="fas fa-tools text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
 
-  // --- SM-2 simple
-  const DAY=24*60*60*1000;
-  const initStats=(s)=>({ attempts:0, correct:0, lastSeen:0, ease:2.5, interval:0, due:0, ...(s||{}) });
-  const updateSM2=(s,grade)=>{ let {ease=2.5,interval=0}=s; if(grade<3) interval=1; else { if(interval===0) interval=1; else if(interval===1) interval=6; else interval=Math.round(interval*ease); } ease=Math.max(1.3, ease+(0.1-(5-grade)*(0.08+(5-grade)*0.02))); return {...s, ease, interval, due:Date.now()+interval*DAY}; };
+                <!-- Project Card 3 -->
+                <div class="bg-slate-800 rounded-xl overflow-hidden hover-scale shadow-lg border border-slate-700 flex flex-col">
+                    <div class="h-48 bg-gradient-to-br from-blue-900 to-slate-800 flex items-center justify-center relative group">
+                        <i class="fas fa-music text-6xl text-white/20 group-hover:text-white/40 transition-colors"></i>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <div class="mb-auto">
+                            <div class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">Audio & Acoustique</div>
+                            <h3 class="text-xl font-bold mb-2">Enceinte DIY Hi-Fi</h3>
+                            <p class="text-gray-400 text-sm mb-4">
+                                Gestion de projet individuel : recherche acoustique, autoformation, planification, prototypage et évaluation finale.
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-slate-700 flex justify-between items-center">
+                            <span class="text-xs text-gray-500">2024</span>
+                            <i class="fas fa-volume-up text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
 
-  // --- router
-  function useHashRoute(){
-    const [path,setPath]=React.useState(location.hash.slice(1)||'/');
-    React.useEffect(()=>{ const f=()=>setPath(location.hash.slice(1)||'/'); window.addEventListener('hashchange',f); return()=>window.removeEventListener('hashchange',f); },[]);
-    return [path,(p)=>location.hash=p];
-  }
+                 <!-- Project Card 4 (Design Continu) -->
+                 <div class="bg-slate-800 rounded-xl overflow-hidden hover-scale shadow-lg border border-slate-700 flex flex-col md:col-span-2 lg:col-span-3">
+                    <div class="p-8 flex flex-col md:flex-row gap-8 items-center">
+                        <div class="w-full md:w-1/3">
+                             <!-- PLACEHOLDER: Image Design Continu ou Trophée -->
+                             <div class="rounded-lg overflow-hidden h-64 bg-gray-700">
+                                 <img src="https://placehold.co/600x600/334155/white?text=Design+%26+Trophées" alt="Design 3D" class="w-full h-full object-cover">
+                             </div>
+                        </div>
+                        <div class="w-full md:w-2/3">
+                            <div class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">Design & Création</div>
+                            <h3 class="text-2xl font-bold mb-4">Design et Création 3D en Continu</h3>
+                            <p class="text-gray-400 mb-6">
+                                Conception et fabrication de pièces uniques pour divers événements et clients :
+                            </p>
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <div class="flex items-center gap-3 bg-slate-700/50 p-3 rounded-lg">
+                                    <i class="fas fa-trophy text-yellow-500"></i>
+                                    <span class="text-sm">Trophées Concours Éloquence UTT</span>
+                                </div>
+                                <div class="flex items-center gap-3 bg-slate-700/50 p-3 rounded-lg">
+                                    <i class="fas fa-award text-yellow-500"></i>
+                                    <span class="text-sm">Prix de l'inclusion L'Oréal</span>
+                                </div>
+                                <div class="flex items-center gap-3 bg-slate-700/50 p-3 rounded-lg">
+                                    <i class="fas fa-industry text-blue-400"></i>
+                                    <span class="text-sm">Chaîne de production pédagogique</span>
+                                </div>
+                                <div class="flex items-center gap-3 bg-slate-700/50 p-3 rounded-lg">
+                                    <i class="fas fa-palette text-pink-400"></i>
+                                    <span class="text-sm">Move Ops (Concours L'Oréal)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-  // --- quiz helpers
-  function pickWeighted(cards, srOn){
-    const due = srOn? cards.filter(c=>(c.stats?.due||0)<=Date.now()) : [];
-    const pool = due.length? due : cards;
-    const weights = pool.map(c=>{ const st=c.stats||{attempts:0,correct:0}; const rate=st.attempts?(st.correct/st.attempts):0; return 1.5-rate; });
-    let sum=weights.reduce((a,b)=>a+b,0), r=Math.random()*sum;
-    for(let i=0;i<pool.length;i++){ r-=weights[i]; if(r<=0) return pool[i]; }
-    return pool[pool.length-1];
-  }
-  const notTooSimilarTerm = (a,b)=> levenshtein(a,b)>=3;
-  const notTooSimilarDef  = (a,b)=> textSim(a,b)<=0.9;
+            </div>
+        </div>
+    </section>
 
-  function makeQuestion(deckCards, params){
-    const eligible = deckCards;
-    if(eligible.length<4) return null;
-    const target = pickWeighted(eligible, params.sr);
-    const mode = params.mode==='mix' ? (Math.random()<0.5?'A':'B') : params.mode;
-    const correct = (mode==='A')? target.term : target.definition;
-    const bank = (mode==='A')? eligible.map(c=>c.term) : eligible.map(c=>c.definition);
-    const validator = (mode==='A')? (x)=>notTooSimilarTerm(x,correct) : (x)=>notTooSimilarDef(x,correct);
-    const options=[correct]; const bag=shuffle(bank.slice());
-    for(const x of bag){ if(options.length===4) break; if(x===correct) continue; if(!validator(x)) continue; if(options.includes(x)) continue; options.push(x); }
-    return { prompt: (mode==='A')? target.definition : target.term, options: shuffle(options), answer: correct, cardId: target.id, explain: target.term+' — '+target.definition };
-  }
+    <!-- Skills Section -->
+    <section id="skills" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-16">
+                <h2 class="text-3xl font-bold text-slate-900 section-title">Compétences Techniques</h2>
+            </div>
 
-  // --- UI bits
-  const Button = (p)=> h('button',{className:"inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium border bg-white/80 dark:bg-slate-800/60 hover:bg-slate-100/70 dark:hover:bg-slate-800 focus-visible:ring-2 ring-emerald-400 "+(p.className||''),...p});
-  const Nav = ({go}) => h('header',{className:"sticky top-0 z-20 border-b bg-white/70 dark:bg-slate-900/70 backdrop-blur"},
-    h('div',{className:"mx-auto max-w-6xl px-4 py-3 flex items-center gap-3"},
-      h('div',{className:"font-semibold"}, t('appTitle')),
-      h('nav',{className:"ml-auto flex gap-2"},
-        h(Button,{onClick:()=>go('/')}, "Accueil"),
-        h(Button,{onClick:()=>go('/decks')}, t('decks')),
-        h(Button,{onClick:()=>go('/quiz')}, t('quiz')),
-        h(Button,{onClick:()=>go('/stats')}, t('stats')),
-        h(Button,{onClick:()=>go('/settings')}, t('settings')),
-        h(Button,{onClick:()=>go('/help')}, t('help')),
-      )
-    )
-  );
+            <div class="grid md:grid-cols-2 gap-12">
+                <!-- Hard Skills -->
+                <div>
+                    <h3 class="text-xl font-bold mb-6 flex items-center text-slate-800">
+                        <span class="bg-blue-100 text-blue-600 p-2 rounded mr-3"><i class="fas fa-laptop-code"></i></span>
+                        Logiciels & Numérique
+                    </h3>
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="font-medium text-gray-700">Blender (Design & Rendu)</span>
+                                <span class="text-sm text-gray-500">Avancé</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="font-medium text-gray-700">CAO (Creo, Catia, Fusion 360)</span>
+                                <span class="text-sm text-gray-500">Intermédiaire/Avancé</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 80%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="font-medium text-gray-700">Impression 3D (Cura, PrusaSlicer)</span>
+                                <span class="text-sm text-gray-500">Expert</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 95%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="font-medium text-gray-700">Suite Adobe (Lr, Ai)</span>
+                                <span class="text-sm text-gray-500">Intermédiaire</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 70%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-  const Home = ({go}) => h('div',{className:"mx-auto max-w-3xl p-4 space-y-4"},
-    h('h1',{className:"text-xl font-semibold"},"Bienvenue 👋"),
-    h('p',{className:"text-slate-600 dark:text-slate-300"},"Choisis « Quiz » pour lancer une série sur les définitions ou sur les concepts/théories. Tout est stocké localement."),
-    h('div',{className:"flex gap-2"},
-      h(Button,{onClick:()=>go('/quiz')}, "Commencer le quiz"),
-      h(Button,{onClick:()=>go('/decks')}, "Voir les decks"),
-    )
-  );
+                <!-- Soft Skills -->
+                <div>
+                    <h3 class="text-xl font-bold mb-6 flex items-center text-slate-800">
+                        <span class="bg-indigo-100 text-indigo-600 p-2 rounded mr-3"><i class="fas fa-users"></i></span>
+                        Compétences Transverses
+                    </h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center hover:border-blue-400 transition-colors">
+                            <i class="fas fa-comments text-2xl text-gray-400 mb-2"></i>
+                            <p class="font-medium text-gray-800">Prise de parole</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center hover:border-blue-400 transition-colors">
+                            <i class="fas fa-people-carry text-2xl text-gray-400 mb-2"></i>
+                            <p class="font-medium text-gray-800">Travail d'équipe</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center hover:border-blue-400 transition-colors">
+                            <i class="fas fa-hourglass-half text-2xl text-gray-400 mb-2"></i>
+                            <p class="font-medium text-gray-800">Gestion du temps</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center hover:border-blue-400 transition-colors">
+                            <i class="fas fa-tasks text-2xl text-gray-400 mb-2"></i>
+                            <p class="font-medium text-gray-800">Gestion de projet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  const DecksPage = ({go,decks,reload})=>{
-    const [name,setName]=React.useState('');
-    async function create(){
-      if(!name.trim()) return;
-      const d={id:crypto.randomUUID(), name:name.trim(), createdAt:now(), updatedAt:now(), cards:[]};
-      await saveDeck(d); setName(''); reload();
-    }
-    return h('div',{className:"mx-auto max-w-6xl p-4 space-y-4"},
-      h('h1',{className:"text-xl font-semibold"}, t('decks')),
-      h('div',{className:"flex gap-2"},
-        h('input',{className:"w-full rounded-xl border px-3 py-2", placeholder:t('createDeck')+'…', value:name, onChange:e=>setName(e.target.value)}),
-        h(Button,{onClick:create}, t('createDeck'))
-      ),
-      h('div',{className:"grid sm:grid-cols-2 lg:grid-cols-3 gap-3"},
-        decks.map(d=> h('div',{key:d.id,className:"rounded-xl border p-3 bg-white/60 dark:bg-slate-800/40"},
-          h('div',{className:"font-medium"}, d.name),
-          h('div',{className:"text-xs text-slate-500"}, `${(d.cards||[]).length} cartes`),
-          h('div',{className:"mt-2 flex gap-2"},
-            h(Button,{onClick:()=>{ location.hash = `#/decks/:id?id=${d.id}` }}, 'Ouvrir')
-          )
-        ))
-      )
-    );
-  };
+    <!-- Contact / Footer -->
+    <footer id="contact" class="bg-slate-900 text-white pt-20 pb-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 gap-12 items-center mb-16">
+                <div>
+                    <h2 class="text-3xl font-bold mb-6">Travaillons ensemble</h2>
+                    <p class="text-gray-400 mb-8">
+                        Je suis actuellement à la recherche d'un stage Assistant Ingénieur. Si mon profil vous intéresse, n'hésitez pas à me contacter.
+                    </p>
+                    <div class="space-y-4">
+                        <a href="mailto:thomas.debauge@utt.fr" class="flex items-center group">
+                            <span class="bg-blue-600 p-3 rounded-full group-hover:bg-blue-500 transition-colors">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <span class="ml-4 text-lg text-gray-300 group-hover:text-white transition-colors">thomas.debauge@utt.fr</span>
+                        </a>
+                        <div class="flex items-center group">
+                            <span class="bg-blue-600 p-3 rounded-full">
+                                <i class="fas fa-phone"></i>
+                            </span>
+                            <span class="ml-4 text-lg text-gray-300">+33 6 24 51 91 46</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-800 p-8 rounded-2xl border border-slate-700 text-center">
+                    <h3 class="text-xl font-bold mb-6">Retrouvez-moi sur les réseaux</h3>
+                    <div class="flex justify-center gap-6">
+                        <a href="#" class="text-4xl text-gray-400 hover:text-white transition-colors hover:scale-110 transform duration-300"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-4xl text-gray-400 hover:text-pink-500 transition-colors hover:scale-110 transform duration-300" title="@blenderyourdream"><i class="fab fa-instagram"></i></a>
+                    </div>
+                    <p class="mt-6 text-sm text-gray-500">
+                        Instagram : @blenderyourdream | @yourdreamin3D | @sbrphotographie
+                    </p>
+                </div>
+            </div>
+            
+            <div class="border-t border-slate-800 pt-8 text-center text-gray-500 text-sm">
+                <p>&copy; 2025 Thomas Debauge. Tous droits réservés. Site conçu en HTML/TailwindCSS.</p>
+            </div>
+        </div>
+    </footer>
 
-  const DeckDetail = ({deckId})=>{
-    const [deck,setDeck]=React.useState(null);
-    React.useEffect(()=>{ idb.get(DB,'decks',deckId).then(setDeck); },[deckId]);
-    if(!deck) return h('div',{className:"p-4"},"Chargement…");
-    return h('div',{className:"mx-auto max-w-6xl p-4 space-y-4"},
-      h('h1',{className:"text-xl font-semibold"}, deck.name),
-      h('div',{className:"rounded-xl border p-3"},
-        h('div',{className:"text-sm text-slate-500 mb-2"}, `${deck.cards.length} cartes`),
-        h('div',{className:"space-y-2 max-h-[70vh] overflow-auto pr-2"},
-          deck.cards.map(c=> h('div',{key:c.id,className:"border rounded-lg p-2 bg-white/50 dark:bg-slate-800/40"},
-            h('div',{className:"font-medium"}, c.term),
-            h('div',{className:"text-sm text-slate-600 dark:text-slate-300"}, c.definition),
-            h('div',{className:"text-xs mt-1"}, (c.tags||[]).join(' · '))
-          ))
-        )
-      )
-    );
-  };
-
-  const QuizPage = ({decks})=>{
-    const [params,setParams]=React.useState({ deckIds: decks.map(d=>d.id), mode:'A', limit:10, timerSeconds:0, sr:true });
-    const [pool,setPool]=React.useState([]);
-    const [current,setCurrent]=React.useState(null);
-    const [selected,setSelected]=React.useState(null);
-    const [session,setSession]=React.useState(null);
-    const live = $('#live');
-
-    React.useEffect(()=>{ setPool(decks.filter(d=> params.deckIds.includes(d.id)).flatMap(d=>d.cards)); },[decks, params.deckIds.join(',')]);
-
-    function quickPick(which){
-      if(which==='defs'){ setParams(p=>({...p, deckIds:[DECK_DEFS.id]})); }
-      else if(which==='concepts'){ setParams(p=>({...p, deckIds:[DECK_CONCEPTS.id]})); }
-      else { setParams(p=>({...p, deckIds:decks.map(d=>d.id)})); }
-    }
-
-    function start(){
-      if(pool.length<4){ alert(t('need4')); return; }
-      setSession({id:crypto.randomUUID(), startedAt:now(), deckIds:params.deckIds, questions:0, correct:0, avgTimeMs:0, items:[]});
-      setSelected(null);
-      setCurrent(makeQuestion(pool, params));
-    }
-    async function record(cardId, ok, timeMs){
-      setSession(s=>{
-        const items=[...(s?.items||[]), {cardId, correct:ok, timeMs}];
-        const questions=(s?.questions||0)+1;
-        const correct=(s?.correct||0)+(ok?1:0);
-        const avgTimeMs=Math.round(((s?.avgTimeMs||0)*(questions-1)+timeMs)/questions);
-        return {...(s||{}), items, questions, correct, avgTimeMs};
-      });
-      const deck = decks.find(d=> d.cards.some(c=>c.id===cardId));
-      if(deck){ const c = deck.cards.find(x=>x.id===cardId);
-        c.stats = initStats(c.stats);
-        c.stats.attempts++; if(ok) c.stats.correct++;
-        c.stats.lastSeen = now();
-        c.stats = updateSM2(c.stats, ok?5:0);
-        await saveDeck(deck);
-      }
-    }
-    let startTime = now();
-    function submit(choice){
-      if(!current || selected) return;
-      const ok = (choice===current.answer);
-      setSelected(choice);
-      live.textContent = ok? t('correct') : t('incorrect');
-      record(current.cardId, ok, now()-startTime);
-    }
-    function next(){ setSelected(null); setCurrent(makeQuestion(pool, params)); startTime=now(); }
-    React.useEffect(()=>{
-      const onKey=(ev)=>{ if(!current) return; if(/^[1-4]$/.test(ev.key)){ submit(current.options[Number(ev.key)-1]); } if(ev.key==='Enter'||ev.key.toLowerCase()==='n'){ if(selected) next(); } };
-      window.addEventListener('keydown',onKey); return()=>window.removeEventListener('keydown',onKey);
-    },[current,selected]);
-
-    return h('div',{className:"mx-auto max-w-3xl p-4 space-y-4"},
-      h('div',{className:"flex flex-wrap gap-2 items-end"},
-        h('div',{className:"grow"},
-          h('label',{className:"block text-sm mb-1"}, t('deckSelect')),
-          h('select',{multiple:true, size:3, className:"w-full rounded-xl border p-2 bg-white/70 dark:bg-slate-800/60",
-            value: params.deckIds, onChange:e=>{ const opts=[...e.target.options].filter(o=>o.selected).map(o=>o.value); setParams(p=>({...p, deckIds:opts})); }},
-            decks.map(d=> h('option',{key:d.id,value:d.id}, d.name))
-          )
-        ),
-        h('div', null,
-          h('label',{className:"block text-sm mb-1"}, t('quiz')),
-          h('div',{className:"flex gap-2"},
-            h(Button,{onClick:()=>setParams(p=>({...p, mode:'A'}))}, t('modeA')),
-            h(Button,{onClick:()=>setParams(p=>({...p, mode:'B'}))}, t('modeB')),
-            h(Button,{onClick:()=>setParams(p=>({...p, mode:'mix'}))}, t('mixed')),
-          )
-        ),
-        h('div', null,
-          h('label',{className:"block text-sm mb-1"}, t('chooseCount')),
-          h('div',{className:"flex gap-2"},
-            h('input',{type:'number', min:1, className:"w-24 rounded-xl border px-3 py-2", value:params.limit||10, onChange:e=>setParams(p=>({...p, limit:Number(e.target.value)}))}),
-            h(Button,{onClick:()=>setParams(p=>({...p, limit:undefined}))}, t('unlimited'))
-          )
-        ),
-        h('div', null,
-          h('label',{className:"block text-sm mb-1"}, t('timer')),
-          h('input',{type:'number', min:0, className:"w-24 rounded-xl border px-3 py-2", value:params.timerSeconds||0, onChange:e=>setParams(p=>({...p, timerSeconds:Number(e.target.value)}))})
-        ),
-        h('div',{className:"flex items-center gap-2"},
-          h('span',null,t('quickPick')+':'),
-          h(Button,{onClick:()=>quickPick('defs')}, t('definitions')),
-          h(Button,{onClick:()=>quickPick('concepts')}, t('concepts')),
-          h(Button,{onClick:()=>quickPick('all')}, t('all')),
-        ),
-        h(Button,{onClick:start, className:"ml-auto"}, t('start'))
-      ),
-      current && h('div',{className:"rounded-2xl border bg-white/70 dark:bg-slate-800/40 p-4 space-y-3"},
-        h('div',{className:"text-xl font-semibold"}, current.prompt),
-        h('div',{className:"grid gap-3"},
-          current.options.map((opt,i)=>{
-            const isSel = selected===opt; const isAns=current.answer===opt;
-            const state = selected? (isAns?'ring-2 ring-emerald-400 bg-emerald-50 dark:bg-emerald-900/30': isSel?'ring-2 ring-red-400 bg-red-50 dark:bg-red-900/30':'opacity-60') : 'hover:bg-slate-100/60 dark:hover:bg-slate-800/60';
-            return h('button',{key:i, className:`text-left rounded-xl border p-3 focus-visible:ring-2 ${state}`, onClick:()=>submit(opt), 'aria-pressed':isSel},
-              h('div',{className:"text-sm opacity-70"}, (i+1)+'. '), h('div',{className:"font-medium"}, opt)
-            );
-          })
-        ),
-        h('div',{className:"flex gap-2"},
-          h(Button,{onClick:()=> location.hash='#/'}, t('quit')),
-          h(Button,{onClick:next, disabled:!selected}, t('next')),
-          h('div',{className:"ml-auto text-xs text-slate-500"}, t('keyboard'))
-        ),
-        selected && h('div',{className:"rounded-lg bg-slate-100 dark:bg-slate-800 p-3 mt-2", role:'alert'}, current.explain)
-      ),
-      !current && h('div',{className:"text-sm text-slate-500"}, t('keyboard'))
-    );
-  };
-
-  const SettingsPage = ()=>{
-    const [s,setS]=React.useState(null);
-    React.useEffect(()=>{ (async()=>{ const st=await getSettings(); setS(st); applyTheme(st.theme); })(); },[]);
-    function applyTheme(mode){
-      const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const dark = mode==='dark' || (mode==='system' && sysDark);
-      document.body.dataset.theme = dark? 'dark':'light';
-    }
-    if(!s) return h('div',{className:"p-4"},"Chargement…");
-    return h('div',{className:"mx-auto max-w-3xl p-4 space-y-4"},
-      h('h1',{className:"text-xl font-semibold"}, t('settings')),
-      h('div',{className:"rounded-xl border p-3 space-y-3"},
-        h('div',null,t('theme')),
-        h('div',{className:"flex gap-2"},
-          ['light','dark','system'].map(m=> h(Button,{key:m,onClick:async()=>{ const ns={...s,theme:m}; setS(ns); await saveSettings(ns); applyTheme(m); }}, t(m)))
-        )
-      )
-    );
-  };
-
-  const StatsPage = ({sessions,decks})=>{
-    const totalQ = sessions.reduce((a,b)=>a+b.questions,0);
-    const totalC = sessions.reduce((a,b)=>a+b.correct,0);
-    return h('div',{className:"mx-auto max-w-5xl p-4 space-y-4"},
-      h('h1',{className:"text-xl font-semibold"},"Statistiques"),
-      h('div',{className:"grid sm:grid-cols-3 gap-3"},
-        h('div',{className:"rounded-xl border p-3"}, h('div',{className:"text-sm"}, "Questions"), h('div',{className:"text-2xl font-semibold"}, totalQ)),
-        h('div',{className:"rounded-xl border p-3"}, h('div',{className:"text-sm"}, "Score"), h('div',{className:"text-2xl font-semibold"}, totalQ? Math.round(100*totalC/totalQ)+'%':'—')),
-        h('div',{className:"rounded-xl border p-3"}, h('div',{className:"text-sm"}, "Temps moyen"), h('div',{className:"text-2xl font-semibold"}, sessions.length? Math.round(sessions.reduce((a,b)=>a+b.avgTimeMs,0)/sessions.length)+' ms':'—')),
-      )
-    );
-  };
-
-  const App = ()=>{
-    const [route,go]=useHashRoute();
-    const [decks,setDecks]=React.useState([]);
-    const [sessions,setSessions]=React.useState([]);
-    async function reload(){ setDecks(await loadDecks()); setSessions(await idb.all(DB,'sessions')); }
-    React.useEffect(()=>{ reload(); },[]);
-    return h('div',null,
-      h(Nav,{go}),
-      route==='/' && h(Home,{go}),
-      route==='/decks' && h(DecksPage,{go,decks,reload}),
-      route==='/decks/:id' && ( ()=>{ const id=(new URLSearchParams(location.hash.split('?')[1]||'')).get('id'); return h(DeckDetail,{deckId:id}); })(),
-      route==='/quiz' && h(QuizPage,{decks}),
-      route==='/settings' && h(SettingsPage,{}),
-      route==='/stats' && h(StatsPage,{sessions,decks}),
-      route==='/help' && h('div',{className:"mx-auto max-w-3xl p-4 space-y-3"},
-        h('h1',{className:"text-xl font-semibold"},"Aide rapide"),
-        h('ul',{className:"list-disc pl-5 space-y-1 text-sm"},
-          h('li',null,"Choisis « Défs », « Concepts » ou « Tout » via les boutons rapides du Quiz."),
-          h('li',null,"Mode du quiz : Définition→Mot (par défaut), Mot→Définition ou Mixte."),
-          h('li',null,"Les données sont locales (IndexedDB). Tu peux ajouter tes propres cartes dans « Decks »."),
-        )
-      )
-    );
-  };
-
-  (async function(){
-    DB = await idb.open();
-    await ensureSeed();
-    const root = ReactDOM.createRoot(document.getElementById('app'));
-    root.render(h(App));
-  })();
-})();
-</script>
 </body>
 </html>
