@@ -1,480 +1,480 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio - Thomas Debauge</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Révisions d'Espagnol</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap');
-
-        body {
-            font-family: 'Open Sans', sans-serif;
-            scroll-behavior: smooth;
-        }
+        body { font-family: 'Segoe UI', sans-serif; line-height: 1.6; margin: 0; background: #f4f4f9; color: #333; }
+        header { background: #e74c3c; color: white; text-align: center; padding: 1rem; }
+        .container { width: 90%; max-width: 1000px; margin: 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Montserrat', sans-serif;
-        }
+        .tabs { display: flex; cursor: pointer; border-bottom: 2px solid #ddd; margin-bottom: 20px; }
+        .tab { padding: 10px 20px; border: 1px solid transparent; border-bottom: none; transition: 0.3s; font-weight: bold; }
+        .tab:hover { color: #e74c3c; }
+        .tab.active { border: 1px solid #ddd; border-bottom: 2px solid white; color: #e74c3c; margin-bottom: -2px; }
+        
+        .content { display: none; }
+        .content.active { display: block; }
 
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .card { border: 1px solid #eee; padding: 15px; border-radius: 5px; background: #fafafa; }
+        .card h3 { color: #c0392b; margin-top: 0; border-bottom: 1px solid #eee; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        
+        .flashcard { background: white; border: 2px solid #e74c3c; padding: 30px; border-radius: 10px; text-align: center; margin: 20px auto; max-width: 500px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); cursor: pointer; min-height: 200px; display: flex; flex-direction: column; justify-content: center; transition: 0.3s; }
+        .flashcard:hover { transform: scale(1.02); }
+        .flashcard-question { font-size: 18px; color: #333; font-weight: bold; margin-bottom: 20px; }
+        .flashcard-answer { font-size: 24px; color: #e74c3c; font-weight: bold; display: none; }
+        .flashcard.flipped .flashcard-question { display: none; }
+        .flashcard.flipped .flashcard-answer { display: block; }
+        .flashcard-text { font-size: 14px; color: #888; margin-top: 20px; }
+        .btn { background: #e74c3c; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; margin: 5px; }
+        .btn:hover { background: #c0392b; }
+        .btn-container { text-align: center; margin-top: 20px; }
+        .score { font-size: 16px; color: #333; margin-bottom: 20px; }
 
-        .section-title::after {
-            content: '';
-            display: block;
-            width: 60px;
-            height: 4px;
-            background: #2563eb; /* Bleu roi */
-            margin-top: 10px;
-            border-radius: 2px;
-        }
-
-        .timeline-line {
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background-color: #e5e7eb;
-        }
-
-        .hover-scale {
-            transition: transform 0.3s ease;
-        }
-        .hover-scale:hover {
-            transform: translateY(-5px);
-        }
     </style>
 </head>
-<body class="bg-slate-50 text-gray-800 antialiased">
+<body>
 
-    <!-- Navigation -->
-    <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex-shrink-0 font-bold text-2xl tracking-tight text-slate-900">
-                    TD<span class="text-blue-600">.</span>
-                </div>
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-8">
-                        <a href="#home" class="hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Accueil</a>
-                        <a href="#about" class="hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Profil</a>
-                        <a href="#experience" class="hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Expérience</a>
-                        <a href="#projects" class="hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Projets</a>
-                        <a href="#skills" class="hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors">Compétences</a>
-                        <a href="#contact" class="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-full text-sm font-medium transition-colors shadow-md">Contact</a>
-                    </div>
+<header>
+    <h1>Révisions d'Espagnol</h1>
+</header>
+
+<div class="container">
+    <div class="tabs">
+        <div class="tab active" onclick="openTab(event, 'grammaire')">Temps & Conjugaison</div>
+        <div class="tab" onclick="openTab(event, 'conjugaison')">Conjugaison (Présent)</div>
+        <div class="tab" onclick="openTab(event, 'verbes')">Verbes de Base (20)</div>
+        <div class="tab" onclick="openTab(event, 'exercices')">Exercices</div>
+        <div class="tab" onclick="openTab(event, 'exercices-base')">Exercices Verbes de Base</div>
+    </div>
+
+    <div id="grammaire" class="content active">
+        <div class="card">
+            <h3>Presente</h3>
+            <p><strong>-AR:</strong> -o, -as, -a, -amos, -áis, -an</p>
+            <p><strong>-ER:</strong> -o, -es, -e, -emos, -éis, -en</p>
+            <p><strong>-IR:</strong> -o, -es, -e, -imos, -ís, -en</p>
+            <p style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;"><strong>Irréguliers:</strong></p>
+            <p><strong>Ser:</strong> soy, eres, es, somos, sois, son</p>
+            <p><strong>Ir:</strong> voy, vas, va, vamos, vais, van</p>
+            <p><strong>Estar:</strong> estoy, estás, está, estamos, estáis, están</p>
+            <p><strong>Hacer:</strong> hago, haces, hace, hacemos, hacéis, hacen</p>
+        </div>
+        <div class="card">
+            <h3>Imperfecto</h3>
+            <p><strong>-AR:</strong> -aba, -abas, -aba, -ábamos, -abais, -aban</p>
+            <p><strong>-ER/-IR:</strong> -ía, -ías, -ía, -íamos, -íais, -ían</p>
+            <p style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;"><strong>Irréguliers:</strong></p>
+            <p><strong>Ser:</strong> era, eras, era, éramos, erais, eran</p>
+            <p><strong>Ir:</strong> iba, ibas, iba, íbamos, ibais, iban (même conjugaison que ir régulier)</p>
+            <p><strong>Ver:</strong> veía, veías, veía, veíamos, veíais, veían</p>
+        </div>
+        <div class="card">
+            <h3>Pasado Compuesto</h3>
+            <p>Auxiliaire <strong>Haber</strong> + Participe passé (-ado / -ido)</p>
+            <p><em>he, has, ha, hemos, habéis, han</em></p>
+            <p style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;"><strong>Participes irréguliers:</strong></p>
+            <p><strong>Hacer:</strong> hecho | <strong>Ver:</strong> visto | <strong>Escribir:</strong> escrito</p>
+            <p><strong>Abrir:</strong> abierto | <strong>Decir:</strong> dicho | <strong>Poner:</strong> puesto</p>
+        </div>
+        <div class="card">
+            <h3>Futuro Simple</h3>
+            <p>Infinitif + terminaisons :</p>
+            <p><strong>-é, -ás, -á, -emos, -éis, -án</strong></p>
+            <p style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;"><strong>Irréguliers (radical modifié):</strong></p>
+            <p><strong>Decir:</strong> diré, dirás, dirá... | <strong>Hacer:</strong> haré, harás, hará...</p>
+            <p><strong>Tener:</strong> tendré, tendrás, tendrá... | <strong>Venir:</strong> vendré, vendrás, vendrá...</p>
+            <p><strong>Poner:</strong> pondré, pondrás, pondrá... | <strong>Saber:</strong> sabré, sabrás, sabrá...</p>
+        </div>
+    </div>
+
+    <div id="conjugaison" class="content">
+        <div class="card">
+            <h3>Ser (être - identité, profession)</h3>
+            <table>
+                <tr><td>yo</td><td>soy</td></tr>
+                <tr><td>tú</td><td>eres</td></tr>
+                <tr><td>él/ella/usted</td><td>es</td></tr>
+                <tr><td>nosotros/as</td><td>somos</td></tr>
+                <tr><td>vosotros/as</td><td>sois</td></tr>
+                <tr><td>ellos/ellas/ustedes</td><td>son</td></tr>
+            </table>
+        </div>
+        <div class="card">
+            <h3>Estar (être - localisation, état)</h3>
+            <table>
+                <tr><td>yo</td><td>estoy</td></tr>
+                <tr><td>tú</td><td>estás</td></tr>
+                <tr><td>él/ella/usted</td><td>está</td></tr>
+                <tr><td>nosotros/as</td><td>estamos</td></tr>
+                <tr><td>vosotros/as</td><td>estáis</td></tr>
+                <tr><td>ellos/ellas/ustedes</td><td>están</td></tr>
+            </table>
+        </div>
+        <div class="card">
+            <h3>Haber (avoir - auxiliaire)</h3>
+            <table>
+                <tr><td>yo</td><td>he</td></tr>
+                <tr><td>tú</td><td>has</td></tr>
+                <tr><td>él/ella/usted</td><td>ha</td></tr>
+                <tr><td>nosotros/as</td><td>hemos</td></tr>
+                <tr><td>vosotros/as</td><td>habéis</td></tr>
+                <tr><td>ellos/ellas/ustedes</td><td>han</td></tr>
+            </table>
+        </div>
+        <div class="card">
+            <h3>Tener (avoir - posséder)</h3>
+            <table>
+                <tr><td>yo</td><td>tengo</td></tr>
+                <tr><td>tú</td><td>tienes</td></tr>
+                <tr><td>él/ella/usted</td><td>tiene</td></tr>
+                <tr><td>nosotros/as</td><td>tenemos</td></tr>
+                <tr><td>vosotros/as</td><td>tenéis</td></tr>
+                <tr><td>ellos/ellas/ustedes</td><td>tienen</td></tr>
+            </table>
+        </div>
+        <div class="card">
+            <h3>Ir (aller)</h3>
+            <table>
+                <tr><td>yo</td><td>voy</td></tr>
+                <tr><td>tú</td><td>vas</td></tr>
+                <tr><td>él/ella/usted</td><td>va</td></tr>
+                <tr><td>nosotros/as</td><td>vamos</td></tr>
+                <tr><td>vosotros/as</td><td>vais</td></tr>
+                <tr><td>ellos/ellas/ustedes</td><td>van</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <div id="verbes" class="content">
+        <table>
+            <thead>
+                <tr>
+                    <th>Espagnol</th>
+                    <th>Français</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Ser / Estar</td><td>Être</td></tr>
+                <tr><td>Ir</td><td>Aller</td></tr>
+                <tr><td>Haber</td><td>Avoir (auxiliaire)</td></tr>
+                <tr><td>Tener</td><td>Avoir / Posséder</td></tr>
+                <tr><td>Hacer</td><td>Faire</td></tr>
+                <tr><td>Poder</td><td>Pouvoir</td></tr>
+                <tr><td>Decir</td><td>Dire</td></tr>
+                <tr><td>Querer</td><td>Vouloir</td></tr>
+                <tr><td>Ver</td><td>Voir</td></tr>
+                <tr><td>Saber</td><td>Savoir</td></tr>
+                <tr><td>Dar</td><td>Donner</td></tr>
+                <tr><td>Venir</td><td>Venir</td></tr>
+                <tr><td>Llegar</td><td>Arriver</td></tr>
+                <tr><td>Pensar</td><td>Penser</td></tr>
+                <tr><td>Comer</td><td>Manger</td></tr>
+                <tr><td>Beber</td><td>Boire</td></tr>
+                <tr><td>Vivir</td><td>Vivre</td></tr>
+                <tr><td>Dormir</td><td>Dormir</td></tr>
+                <tr><td>Hablar</td><td>Parler</td></tr>
+                <tr><td>Escribir</td><td>Écrire</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="exercices" class="content">
+        <div id="exercices-container"></div>
+    </div>
+
+    <div id="exercices-base" class="content">
+        <div id="exercices-base-container"></div>
+    </div>
+</div>
+
+<script>
+    function openTab(evt, tabName) {
+        var i, content, tabs;
+        content = document.getElementsByClassName("content");
+        for (i = 0; i < content.length; i++) { content[i].style.display = "none"; }
+        tabs = document.getElementsByClassName("tab");
+        for (i = 0; i < tabs.length; i++) { tabs[i].className = tabs[i].className.replace(" active", ""); }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+        if (tabName === 'exercices') {
+            afficherSelectionTemps();
+        } else if (tabName === 'exercices-base') {
+            genererQuestionsVerbsBase();
+        }
+    }
+    const conjugaisonsBase = [
+        { verbe: "ser", infinitif: "être (identité)", yo: "soy", tu: "eres", el: "es", nosotros: "somos", vosotros: "sois", ellos: "son" },
+        { verbe: "estar", infinitif: "être (localisation)", yo: "estoy", tu: "estás", el: "está", nosotros: "estamos", vosotros: "estáis", ellos: "están" },
+        { verbe: "ir", infinitif: "aller", yo: "voy", tu: "vas", el: "va", nosotros: "vamos", vosotros: "vais", ellos: "van" },
+        { verbe: "haber", infinitif: "avoir (auxiliaire)", yo: "he", tu: "has", el: "ha", nosotros: "hemos", vosotros: "habéis", ellos: "han" },
+        { verbe: "tener", infinitif: "avoir/posséder", yo: "tengo", tu: "tienes", el: "tiene", nosotros: "tenemos", vosotros: "tenéis", ellos: "tienen" },
+        { verbe: "hacer", infinitif: "faire", yo: "hago", tu: "haces", el: "hace", nosotros: "hacemos", vosotros: "hacéis", ellos: "hacen" },
+        { verbe: "poder", infinitif: "pouvoir", yo: "puedo", tu: "puedes", el: "puede", nosotros: "podemos", vosotros: "podéis", ellos: "pueden" },
+        { verbe: "decir", infinitif: "dire", yo: "digo", tu: "dices", el: "dice", nosotros: "decimos", vosotros: "decís", ellos: "dicen" },
+        { verbe: "querer", infinitif: "vouloir", yo: "quiero", tu: "quieres", el: "quiere", nosotros: "queremos", vosotros: "queréis", ellos: "quieren" },
+        { verbe: "ver", infinitif: "voir", yo: "veo", tu: "ves", el: "ve", nosotros: "vemos", vosotros: "veis", ellos: "ven" },
+        { verbe: "saber", infinitif: "savoir", yo: "sé", tu: "sabes", el: "sabe", nosotros: "sabemos", vosotros: "sabéis", ellos: "saben" },
+        { verbe: "dar", infinitif: "donner", yo: "doy", tu: "das", el: "da", nosotros: "damos", vosotros: "dais", ellos: "dan" },
+        { verbe: "venir", infinitif: "venir", yo: "vengo", tu: "vienes", el: "viene", nosotros: "venimos", vosotros: "venís", ellos: "vienen" },
+        { verbe: "llegar", infinitif: "arriver", yo: "llego", tu: "llegas", el: "llega", nosotros: "llegamos", vosotros: "llegáis", ellos: "llegan" },
+        { verbe: "pensar", infinitif: "penser", yo: "pienso", tu: "piensas", el: "piensa", nosotros: "pensamos", vosotros: "pensáis", ellos: "piensan" },
+        { verbe: "comer", infinitif: "manger", yo: "como", tu: "comes", el: "come", nosotros: "comemos", vosotros: "coméis", ellos: "comen" },
+        { verbe: "beber", infinitif: "boire", yo: "bebo", tu: "bebes", el: "bebe", nosotros: "bebemos", vosotros: "bebéis", ellos: "beben" },
+        { verbe: "vivir", infinitif: "vivre", yo: "vivo", tu: "vives", el: "vive", nosotros: "vivimos", vosotros: "vivís", ellos: "viven" },
+        { verbe: "dormir", infinitif: "dormir", yo: "duermo", tu: "duermes", el: "duerme", nosotros: "dormimos", vosotros: "dormís", ellos: "duermen" },
+        { verbe: "hablar", infinitif: "parler", yo: "hablo", tu: "hablas", el: "habla", nosotros: "hablamos", vosotros: "habláis", ellos: "hablan" },
+        { verbe: "escribir", infinitif: "écrire", yo: "escribo", tu: "escribes", el: "escribe", nosotros: "escribimos", vosotros: "escribís", ellos: "escriben" }
+    ];
+    const conjugaisons = [
+        { verbe: "hablar", infinitif: "parler", presente: { yo: "hablo", tu: "hablas", el: "habla", nosotros: "hablamos", vosotros: "habláis", ellos: "hablan" }, imperfect: { yo: "hablaba", tu: "hablabas", el: "hablaba", nosotros: "hablábamos", vosotros: "hablabais", ellos: "hablaban" }, preterito: { yo: "hablé", tu: "hablaste", el: "habló", nosotros: "hablamos", vosotros: "hablasteis", ellos: "hablaron" }, futuro: { yo: "hablaré", tu: "hablarás", el: "hablará", nosotros: "hablaremos", vosotros: "hablaréis", ellos: "hablarán" }, pasadoCompuesto: { yo: "he hablado", tu: "has hablado", el: "ha hablado", nosotros: "hemos hablado", vosotros: "habéis hablado", ellos: "han hablado" } },
+        { verbe: "comer", infinitif: "manger", presente: { yo: "como", tu: "comes", el: "come", nosotros: "comemos", vosotros: "coméis", ellos: "comen" }, imperfect: { yo: "comía", tu: "comías", el: "comía", nosotros: "comíamos", vosotros: "comíais", ellos: "comían" }, preterito: { yo: "comí", tu: "comiste", el: "comió", nosotros: "comimos", vosotros: "comisteis", ellos: "comieron" }, futuro: { yo: "comeré", tu: "comerás", el: "comerá", nosotros: "comeremos", vosotros: "comeréis", ellos: "comerán" }, pasadoCompuesto: { yo: "he comido", tu: "has comido", el: "ha comido", nosotros: "hemos comido", vosotros: "habéis comido", ellos: "han comido" } },
+        { verbe: "vivir", infinitif: "vivre", presente: { yo: "vivo", tu: "vives", el: "vive", nosotros: "vivimos", vosotros: "vivís", ellos: "viven" }, imperfect: { yo: "vivía", tu: "vivías", el: "vivía", nosotros: "vivíamos", vosotros: "vivíais", ellos: "vivían" }, preterito: { yo: "viví", tu: "viviste", el: "vivió", nosotros: "vivimos", vosotros: "vivisteis", ellos: "vivieron" }, futuro: { yo: "viviré", tu: "vivirás", el: "vivirá", nosotros: "viviremos", vosotros: "viviréis", ellos: "vivirán" }, pasadoCompuesto: { yo: "he vivido", tu: "has vivido", el: "ha vivido", nosotros: "hemos vivido", vosotros: "habéis vivido", ellos: "han vivido" } },
+        { verbe: "ir", infinitif: "aller", presente: { yo: "voy", tu: "vas", el: "va", nosotros: "vamos", vosotros: "vais", ellos: "van" }, imperfect: { yo: "iba", tu: "ibas", el: "iba", nosotros: "íbamos", vosotros: "ibais", ellos: "iban" }, preterito: { yo: "fui", tu: "fuiste", el: "fue", nosotros: "fuimos", vosotros: "fuisteis", ellos: "fueron" }, futuro: { yo: "iré", tu: "irás", el: "irá", nosotros: "iremos", vosotros: "iréis", ellos: "irán" }, pasadoCompuesto: { yo: "he ido", tu: "has ido", el: "ha ido", nosotros: "hemos ido", vosotros: "habéis ido", ellos: "han ido" } },
+        { verbe: "hacer", infinitif: "faire", presente: { yo: "hago", tu: "haces", el: "hace", nosotros: "hacemos", vosotros: "hacéis", ellos: "hacen" }, imperfect: { yo: "hacía", tu: "hacías", el: "hacía", nosotros: "hacíamos", vosotros: "hacíais", ellos: "hacían" }, preterito: { yo: "hice", tu: "hiciste", el: "hizo", nosotros: "hicimos", vosotros: "hicisteis", ellos: "hicieron" }, futuro: { yo: "haré", tu: "harás", el: "hará", nosotros: "haremos", vosotros: "haréis", ellos: "harán" }, pasadoCompuesto: { yo: "he hecho", tu: "has hecho", el: "ha hecho", nosotros: "hemos hecho", vosotros: "habéis hecho", ellos: "han hecho" } },
+        { verbe: "poder", infinitif: "pouvoir", presente: { yo: "puedo", tu: "puedes", el: "puede", nosotros: "podemos", vosotros: "podéis", ellos: "pueden" }, imperfect: { yo: "podía", tu: "podías", el: "podía", nosotros: "podíamos", vosotros: "podíais", ellos: "podían" }, preterito: { yo: "pude", tu: "pudiste", el: "pudo", nosotros: "pudimos", vosotros: "pudisteis", ellos: "pudieron" }, futuro: { yo: "podré", tu: "podrás", el: "podrá", nosotros: "podremos", vosotros: "podréis", ellos: "podrán" }, pasadoCompuesto: { yo: "he podido", tu: "has podido", el: "ha podido", nosotros: "hemos podido", vosotros: "habéis podido", ellos: "han podido" } },
+        { verbe: "decir", infinitif: "dire", presente: { yo: "digo", tu: "dices", el: "dice", nosotros: "decimos", vosotros: "decís", ellos: "dicen" }, imperfect: { yo: "decía", tu: "decías", el: "decía", nosotros: "decíamos", vosotros: "decíais", ellos: "decían" }, preterito: { yo: "dije", tu: "dijiste", el: "dijo", nosotros: "dijimos", vosotros: "dijisteis", ellos: "dijeron" }, futuro: { yo: "diré", tu: "dirás", el: "dirá", nosotros: "diremos", vosotros: "diréis", ellos: "dirán" }, pasadoCompuesto: { yo: "he dicho", tu: "has dicho", el: "ha dicho", nosotros: "hemos dicho", vosotros: "habéis dicho", ellos: "han dicho" } },
+        { verbe: "querer", infinitif: "vouloir", presente: { yo: "quiero", tu: "quieres", el: "quiere", nosotros: "queremos", vosotros: "queréis", ellos: "quieren" }, imperfect: { yo: "quería", tu: "querías", el: "quería", nosotros: "queríamos", vosotros: "queríais", ellos: "querían" }, preterito: { yo: "quise", tu: "quisiste", el: "quiso", nosotros: "quisimos", vosotros: "quisisteis", ellos: "quisieron" }, futuro: { yo: "querré", tu: "querrás", el: "querrá", nosotros: "querremos", vosotros: "querréis", ellos: "querrán" }, pasadoCompuesto: { yo: "he querido", tu: "has querido", el: "ha querido", nosotros: "hemos querido", vosotros: "habéis querido", ellos: "han querido" } },
+        { verbe: "saber", infinitif: "savoir", presente: { yo: "sé", tu: "sabes", el: "sabe", nosotros: "sabemos", vosotros: "sabéis", ellos: "saben" }, imperfect: { yo: "sabía", tu: "sabías", el: "sabía", nosotros: "sabíamos", vosotros: "sabíais", ellos: "sabían" }, preterito: { yo: "supe", tu: "supiste", el: "supo", nosotros: "supimos", vosotros: "supisteis", ellos: "supieron" }, futuro: { yo: "sabré", tu: "sabrás", el: "sabrá", nosotros: "sabremos", vosotros: "sabréis", ellos: "sabrán" }, pasadoCompuesto: { yo: "he sabido", tu: "has sabido", el: "ha sabido", nosotros: "hemos sabido", vosotros: "habéis sabido", ellos: "han sabido" } },
+        { verbe: "dar", infinitif: "donner", presente: { yo: "doy", tu: "das", el: "da", nosotros: "damos", vosotros: "dais", ellos: "dan" }, imperfect: { yo: "daba", tu: "dabas", el: "daba", nosotros: "dábamos", vosotros: "dabais", ellos: "daban" }, preterito: { yo: "dí", tu: "diste", el: "dio", nosotros: "dimos", vosotros: "disteis", ellos: "dieron" }, futuro: { yo: "daré", tu: "darás", el: "dará", nosotros: "daremos", vosotros: "daréis", ellos: "darán" }, pasadoCompuesto: { yo: "he dado", tu: "has dado", el: "ha dado", nosotros: "hemos dado", vosotros: "habéis dado", ellos: "han dado" } },
+        { verbe: "venir", infinitif: "venir", presente: { yo: "vengo", tu: "vienes", el: "viene", nosotros: "venimos", vosotros: "venís", ellos: "vienen" }, imperfect: { yo: "venía", tu: "venías", el: "venía", nosotros: "veníamos", vosotros: "veníais", ellos: "venían" }, preterito: { yo: "vine", tu: "viniste", el: "vino", nosotros: "vinimos", vosotros: "vinisteis", ellos: "vinieron" }, futuro: { yo: "vendré", tu: "vendrás", el: "vendrá", nosotros: "vendremos", vosotros: "vendréis", ellos: "vendrán" }, pasadoCompuesto: { yo: "he venido", tu: "has venido", el: "ha venido", nosotros: "hemos venido", vosotros: "habéis venido", ellos: "han venido" } },
+        { verbe: "pensar", infinitif: "penser", presente: { yo: "pienso", tu: "piensas", el: "piensa", nosotros: "pensamos", vosotros: "pensáis", ellos: "piensan" }, imperfect: { yo: "pensaba", tu: "pensabas", el: "pensaba", nosotros: "pensábamos", vosotros: "pensabais", ellos: "pensaban" }, preterito: { yo: "pensé", tu: "pensaste", el: "pensó", nosotros: "pensamos", vosotros: "pensasteis", ellos: "pensaron" }, futuro: { yo: "pensaré", tu: "pensarás", el: "pensará", nosotros: "pensaremos", vosotros: "pensaréis", ellos: "pensarán" }, pasadoCompuesto: { yo: "he pensado", tu: "has pensado", el: "ha pensado", nosotros: "hemos pensado", vosotros: "habéis pensado", ellos: "han pensado" } },
+        { verbe: "llegar", infinitif: "arriver", presente: { yo: "llego", tu: "llegas", el: "llega", nosotros: "llegamos", vosotros: "llegáis", ellos: "llegan" }, imperfect: { yo: "llegaba", tu: "llegabas", el: "llegaba", nosotros: "llegábamos", vosotros: "llegabais", ellos: "llegaban" }, preterito: { yo: "llegué", tu: "llegaste", el: "llegó", nosotros: "llegamos", vosotros: "llegasteis", ellos: "llegaron" }, futuro: { yo: "llegaré", tu: "llegarás", el: "llegará", nosotros: "llegaremos", vosotros: "llegaréis", ellos: "llegarán" }, pasadoCompuesto: { yo: "he llegado", tu: "has llegado", el: "ha llegado", nosotros: "hemos llegado", vosotros: "habéis llegado", ellos: "han llegado" } },
+        { verbe: "escribir", infinitif: "écrire", presente: { yo: "escribo", tu: "escribes", el: "escribe", nosotros: "escribimos", vosotros: "escribís", ellos: "escriben" }, imperfect: { yo: "escribía", tu: "escribías", el: "escribía", nosotros: "escribíamos", vosotros: "escribíais", ellos: "escribían" }, preterito: { yo: "escribí", tu: "escribiste", el: "escribió", nosotros: "escribimos", vosotros: "escribisteis", ellos: "escribieron" }, futuro: { yo: "escribiré", tu: "escribirás", el: "escribirá", nosotros: "escribiremos", vosotros: "escribiréis", ellos: "escribirán" }, pasadoCompuesto: { yo: "he escrito", tu: "has escrito", el: "ha escrito", nosotros: "hemos escrito", vosotros: "habéis escrito", ellos: "han escrito" } },
+        { verbe: "dormir", infinitif: "dormir", presente: { yo: "duermo", tu: "duermes", el: "duerme", nosotros: "dormimos", vosotros: "dormís", ellos: "duermen" }, imperfect: { yo: "dormía", tu: "dormías", el: "dormía", nosotros: "dormíamos", vosotros: "dormíais", ellos: "dormían" }, preterito: { yo: "dormí", tu: "dormiste", el: "durmió", nosotros: "dormimos", vosotros: "dormisteis", ellos: "durmieron" }, futuro: { yo: "dormiré", tu: "dormirás", el: "dormirá", nosotros: "dormiremos", vosotros: "dormiréis", ellos: "dormirán" }, pasadoCompuesto: { yo: "he dormido", tu: "has dormido", el: "ha dormido", nosotros: "hemos dormido", vosotros: "habéis dormido", ellos: "han dormido" } }
+    ];
+
+    function normaliserAccents(str) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    }
+
+    const pronouns = ["yo", "tú", "él/ella/usted", "nosotros/as", "vosotros/as", "ellos/ellas/ustedes"];
+    const pronounKeys = ["yo", "tu", "el", "nosotros", "vosotros", "ellos"];
+
+    let currentQuestion = 0;
+    let questions = [];
+    let tempsActuel = "presente";
+
+    function afficherSelectionTemps() {
+        const container = document.getElementById('exercices-container');
+        container.innerHTML = `
+            <div class="card" style="text-align: center; padding: 40px;">
+                <h3 style="margin-top: 0; color: #e74c3c; font-size: 24px;">Choisissez le temps à réviser</h3>
+                <div class="btn-container" style="margin-top: 40px;">
+                    <button class="btn" style="padding: 15px 30px; font-size: 16px;" onclick="genererQuestions('presente')">Présent</button>
+                    <button class="btn" style="padding: 15px 30px; font-size: 16px;" onclick="genererQuestions('imperfect')">Imparfait</button>
+                    <button class="btn" style="padding: 15px 30px; font-size: 16px;" onclick="genererQuestions('preterito')">Passé Simple</button>
+                    <button class="btn" style="padding: 15px 30px; font-size: 16px;" onclick="genererQuestions('pasadoCompuesto')">Passé Composé</button>
+                    <button class="btn" style="padding: 15px 30px; font-size: 16px;" onclick="genererQuestions('futuro')">Futur Simple</button>
                 </div>
             </div>
-        </div>
-    </nav>
+        `;
+    }
 
-    <!-- Hero Section -->
-    <section id="home" class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-slate-900 text-white">
-        <div class="absolute inset-0 opacity-20">
-             <!-- Placeholder pour un fond abstrait ou technique si désiré -->
-            <div class="absolute right-0 top-0 bg-blue-600 w-96 h-96 rounded-full filter blur-[120px] opacity-30"></div>
-            <div class="absolute left-0 bottom-0 bg-indigo-600 w-96 h-96 rounded-full filter blur-[120px] opacity-30"></div>
-        </div>
+    function genererQuestions(temps) {
+        tempsActuel = temps;
+        const tempsTexte = {
+            'presente': 'présent',
+            'imperfect': 'imparfait',
+            'preterito': 'passé simple',
+            'pasadoCompuesto': 'passé composé',
+            'futuro': 'futur simple'
+        };
+
+        questions = [];
+        conjugaisons.forEach(conj => {
+            const conjugaisonTemps = conj[temps];
+            for (let i = 0; i < pronounKeys.length; i++) {
+                questions.push({
+                    question: `Conjugue "${conj.infinitif}" (${conj.verbe}) à la 3e personne du singulier ${tempsTexte[temps]}`,
+                    answer: conjugaisonTemps.el,
+                    type: "conjugaison"
+                });
+            }
+        });
+
+        conjugaisons.forEach(conj => {
+            questions.push({
+                question: `Qu'est-ce que "${conj.verbe}" signifie?`,
+                answer: conj.infinitif,
+                type: "traduction"
+            });
+        });
+
+        for (let i = 0; i < 300; i++) {
+            const conj = conjugaisons[Math.floor(Math.random() * conjugaisons.length)];
+            const pronoun = pronounKeys[Math.floor(Math.random() * pronounKeys.length)];
+            const pronounFr = pronouns[pronounKeys.indexOf(pronoun)];
+            const conjugaisonTemps = conj[temps];
+            questions.push({
+                question: `Conjugue "${conj.verbe}" avec "${pronounFr}" au ${tempsTexte[temps]}`,
+                answer: conjugaisonTemps[pronoun],
+                type: "random"
+            });
+        }
+
+        questions = questions.sort(() => Math.random() - 0.5);
+        currentQuestion = 0;
+        afficherQuestion();
+    }
+
+    function afficherQuestion() {
+        const container = document.getElementById('exercices-container');
+        if (currentQuestion >= questions.length) {
+            container.innerHTML = '<div class="card"><h3>Bravo!</h3><p>Vous avez complété tous les exercices!</p><button class="btn" onclick="afficherSelectionTemps()">Changer de temps</button><button class="btn" onclick="afficherSelectionTemps()">Recommencer</button></div>';
+            return;
+        }
+
+        const q = questions[currentQuestion];
+        container.innerHTML = `
+            <div class="score">Question ${currentQuestion + 1} / ${questions.length}</div>
+            <div class="flashcard">
+                <div class="flashcard-question">${q.question}</div>
+                <div style="margin-top: 20px;">
+                    <input type="text" id="userAnswer" placeholder="Votre réponse..." style="padding: 10px; font-size: 16px; width: 100%; max-width: 400px; border: 2px solid #ddd; border-radius: 5px; box-sizing: border-box;" onkeypress="if(event.key==='Enter') verifierReponse('${q.answer}')">
+                </div>
+                <div id="feedback" style="margin-top: 15px;"></div>
+            </div>
+            <div class="btn-container">
+                <button class="btn" onclick="verifierReponse('${q.answer.replace(/'/g, "\\'")}')">Vérifier</button>
+                <button class="btn" onclick="questionSuivante()">Suivant</button>
+                <button class="btn" onclick="questionPrecedente()">Précédent</button>
+            </div>
+        `;
+        document.getElementById('userAnswer').focus();
+    }
+
+    function verifierReponse(bonneReponse) {
+        const userAnswer = document.getElementById('userAnswer').value;
+        const feedback = document.getElementById('feedback');
         
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="text-center lg:text-left grid lg:grid-cols-2 gap-12 items-center">
-                <div>
-                    <h2 class="text-blue-400 font-semibold tracking-wide uppercase mb-4 text-sm">Ingénierie Mécanique & Design</h2>
-                    <h1 class="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
-                        Thomas <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Debauge</span>
-                    </h1>
-                    <p class="text-xl text-gray-300 mb-8 font-light max-w-2xl mx-auto lg:mx-0">
-                        Élève Ingénieur en Génie Mécanique passionné par la conception, le prototypage et l'innovation. À la recherche d'un stage Assistant Ingénieur.
-                    </p>
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                        <a href="#contact" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition-all shadow-lg hover:shadow-blue-500/25 text-center">
-                            Me Contacter
-                        </a>
-                        <a href="#projects" class="px-8 py-3 border border-gray-600 hover:border-white hover:bg-white/5 rounded-lg font-semibold transition-all text-center">
-                            Voir mes projets
-                        </a>
-                    </div>
+        const userNorm = normaliserAccents(userAnswer);
+        const reponseNorm = normaliserAccents(bonneReponse);
+        
+        if (userNorm === reponseNorm) {
+            feedback.innerHTML = '<div style="color: green; font-size: 16px; font-weight: bold;">✓ Correct!</div>';
+        } else {
+            feedback.innerHTML = `<div style="color: red; font-size: 16px; font-weight: bold;">✗ Incorrect</div><div style="color: #666; margin-top: 10px;">Bonne réponse: <strong>${bonneReponse}</strong></div>`;
+        }
+    }
+
+    function questionSuivante() {
+        if (currentQuestion < questions.length - 1) {
+            currentQuestion++;
+            afficherQuestion();
+        }
+    }
+
+    function questionPrecedente() {
+        if (currentQuestion > 0) {
+            currentQuestion--;
+            afficherQuestion();
+        }
+    }
+
+    let currentQuestionBase = 0;
+    let questionsBase = [];
+
+    function genererQuestionsVerbsBase() {
+        questionsBase = [];
+        conjugaisonsBase.forEach(conj => {
+            for (let i = 0; i < pronounKeys.length; i++) {
+                questionsBase.push({
+                    question: `Conjugue "${conj.infinitif}" (${conj.verbe}) à la 3e personne du singulier présent`,
+                    answer: conj.el,
+                    type: "conjugaison"
+                });
+            }
+        });
+
+        conjugaisonsBase.forEach(conj => {
+            questionsBase.push({
+                question: `Qu'est-ce que "${conj.verbe}" signifie?`,
+                answer: conj.infinitif,
+                type: "traduction"
+            });
+        });
+
+        for (let i = 0; i < 300; i++) {
+            const conj = conjugaisonsBase[Math.floor(Math.random() * conjugaisonsBase.length)];
+            const pronoun = pronounKeys[Math.floor(Math.random() * pronounKeys.length)];
+            const pronounFr = pronouns[pronounKeys.indexOf(pronoun)];
+            questionsBase.push({
+                question: `Conjugue "${conj.verbe}" avec "${pronounFr}" au présent`,
+                answer: conj[pronoun],
+                type: "random"
+            });
+        }
+
+        questionsBase = questionsBase.sort(() => Math.random() - 0.5);
+        currentQuestionBase = 0;
+        afficherQuestionBase();
+    }
+
+    function afficherQuestionBase() {
+        const container = document.getElementById('exercices-base-container');
+        if (currentQuestionBase >= questionsBase.length) {
+            container.innerHTML = '<div class="card"><h3>Bravo!</h3><p>Vous avez complété tous les exercices des verbes de base!</p><button class="btn" onclick="genererQuestionsVerbsBase()">Recommencer</button></div>';
+            return;
+        }
+
+        const q = questionsBase[currentQuestionBase];
+        container.innerHTML = `
+            <div class="score">Question ${currentQuestionBase + 1} / ${questionsBase.length}</div>
+            <div class="flashcard">
+                <div class="flashcard-question">${q.question}</div>
+                <div style="margin-top: 20px;">
+                    <input type="text" id="userAnswerBase" placeholder="Votre réponse..." style="padding: 10px; font-size: 16px; width: 100%; max-width: 400px; border: 2px solid #ddd; border-radius: 5px; box-sizing: border-box;" onkeypress="if(event.key==='Enter') verifierReponseBase('${q.answer.replace(/'/g, "\\'")}')">
                 </div>
-                <!-- Image Hero -->
-                <div class="relative hidden lg:block">
-                    <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-700 transform rotate-2 hover:rotate-0 transition-transform duration-500">
-                        <!-- PLACEHOLDER: Remplacez 'vue face grand angle.jpg' par le chemin correct si nécessaire -->
-                        <img src="vue face grand angle.jpg" alt="Rendu 3D Conception Automobile" class="w-full h-auto object-cover" onerror="this.src='https://placehold.co/600x400/1e293b/white?text=Rendu+3D+Automobile'">
-                    </div>
-                    <!-- Floating Card -->
-                    <div class="absolute -bottom-6 -left-6 bg-white text-slate-900 p-4 rounded-xl shadow-xl max-w-xs animate-bounce" style="animation-duration: 3s;">
-                        <div class="flex items-center gap-3">
-                            <div class="bg-blue-100 p-2 rounded-lg text-blue-600">
-                                <i class="fas fa-cube text-xl"></i>
-                            </div>
-                            <div>
-                                <p class="font-bold text-sm">Expertise 3D</p>
-                                <p class="text-xs text-gray-500">Blender, CATIA, Fusion 360</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div id="feedbackBase" style="margin-top: 15px;"></div>
             </div>
-        </div>
-    </section>
-
-    <!-- Presentation Section -->
-    <section id="about" class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="mb-16">
-                <h2 class="text-3xl font-bold text-slate-900 section-title">Présentation Personnelle</h2>
+            <div class="btn-container">
+                <button class="btn" onclick="verifierReponseBase('${q.answer.replace(/'/g, "\\'")}')">Vérifier</button>
+                <button class="btn" onclick="questionSuivanteBase()">Suivant</button>
+                <button class="btn" onclick="questionPrecedenteBase()">Précédent</button>
             </div>
-            
-            <div class="grid md:grid-cols-3 gap-12">
-                <div class="md:col-span-2 text-gray-600 leading-relaxed space-y-6">
-                    <p>
-                        Actuellement étudiant en <strong class="text-slate-900">Génie Mécanique à l'Université de Technologie de Troyes (UTT)</strong>, je suis un futur ingénieur passionné par la concrétisation d'idées techniques. Mon parcours académique, enrichi par une année de PASS (médecine) qui m'a inculqué rigueur et résilience, se combine aujourd'hui avec ma passion pour le design et la mécanique.
-                    </p>
-                    <p>
-                        Au-delà de la théorie, je suis un "maker". Que ce soit à travers la <strong class="text-slate-900">conception de châssis pour la Formula Student</strong>, la réalisation de prototypes fonctionnels en impression 3D, ou la création artistique numérique, je cherche constamment à allier esthétique et fonctionnalité.
-                    </p>
-                    <p>
-                        Je suis à la recherche d'un stage en tant qu'Assistant Ingénieur pour mettre à profit ma créativité technique, ma maîtrise des outils de CAO et mon dynamisme au sein d'une équipe innovante.
-                    </p>
-                </div>
-                
-                <!-- Quick Stats / Highlights -->
-                <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100">
-                    <h3 class="font-bold text-lg mb-6 text-slate-900">Points Clés</h3>
-                    <ul class="space-y-4">
-                        <li class="flex items-start">
-                            <i class="fas fa-graduation-cap text-blue-600 mt-1 mr-3"></i>
-                            <div>
-                                <span class="block font-medium text-slate-900">Formation Ingénieur</span>
-                                <span class="text-sm text-gray-500">UTT - Génie Mécanique (2023-2028)</span>
-                            </div>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-globe-europe text-blue-600 mt-1 mr-3"></i>
-                            <div>
-                                <span class="block font-medium text-slate-900">Mobilité Internationale</span>
-                                <span class="text-sm text-gray-500">Semestre à Sofia, Bulgarie (2025)</span>
-                            </div>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-language text-blue-600 mt-1 mr-3"></i>
-                            <div>
-                                <span class="block font-medium text-slate-900">Langues</span>
-                                <span class="text-sm text-gray-500">Anglais (C1), Espagnol (B1)</span>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
+        `;
+        document.getElementById('userAnswerBase').focus();
+    }
 
-    <!-- Experience Section -->
-    <section id="experience" class="py-20 bg-slate-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="mb-16">
-                <h2 class="text-3xl font-bold text-slate-900 section-title">Expériences Professionnelles</h2>
-            </div>
+    function verifierReponseBase(bonneReponse) {
+        const userAnswer = document.getElementById('userAnswerBase').value;
+        const feedback = document.getElementById('feedbackBase');
+        
+        const userNorm = normaliserAccents(userAnswer);
+        const reponseNorm = normaliserAccents(bonneReponse);
+        
+        if (userNorm === reponseNorm) {
+            feedback.innerHTML = '<div style="color: green; font-size: 16px; font-weight: bold;">✓ Correct!</div>';
+        } else {
+            feedback.innerHTML = `<div style="color: red; font-size: 16px; font-weight: bold;">✗ Incorrect</div><div style="color: #666; margin-top: 10px;">Bonne réponse: <strong>${bonneReponse}</strong></div>`;
+        }
+    }
 
-            <div class="space-y-8">
-                <!-- Exp 1 -->
-                <div class="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow border-l-4 border-blue-600">
-                    <div class="flex flex-col md:flex-row justify-between md:items-center mb-4">
-                        <div>
-                            <h3 class="text-xl font-bold text-slate-900">Stage Ouvrier Bâtiment</h3>
-                            <p class="text-blue-600 font-medium">Société MVP - Valenton</p>
-                        </div>
-                        <span class="text-sm font-semibold text-gray-400 bg-gray-100 px-3 py-1 rounded-full mt-2 md:mt-0 w-fit">Juillet 2024</span>
-                    </div>
-                    <p class="text-gray-600 mb-4 italic">Immersion terrain et travail manuel.</p>
-                    <ul class="list-disc list-inside text-gray-600 space-y-1 marker:text-blue-600">
-                        <li>Travail en équipe pour la réalisation de rénovations et de constructions.</li>
-                        <li>Assistance technique et opérationnelle au chef de chantier.</li>
-                        <li>Développement de l'endurance et de la compréhension des contraintes terrain.</li>
-                    </ul>
-                </div>
+    function questionSuivanteBase() {
+        if (currentQuestionBase < questionsBase.length - 1) {
+            currentQuestionBase++;
+            afficherQuestionBase();
+        }
+    }
 
-                <!-- Exp 2 -->
-                <div class="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow border-l-4 border-blue-600">
-                    <div class="flex flex-col md:flex-row justify-between md:items-center mb-4">
-                        <div>
-                            <h3 class="text-xl font-bold text-slate-900">Assistant Chef de Projet</h3>
-                            <p class="text-blue-600 font-medium">Cosmyx - Epinay</p>
-                        </div>
-                        <span class="text-sm font-semibold text-gray-400 bg-gray-100 px-3 py-1 rounded-full mt-2 md:mt-0 w-fit">Juillet 2021</span>
-                    </div>
-                    <p class="text-gray-600 mb-4 italic">Spécialisation en Fabrication Additive.</p>
-                    <ul class="list-disc list-inside text-gray-600 space-y-1 marker:text-blue-600">
-                        <li>Conception et fabrication de pièces techniques en impression 3D.</li>
-                        <li>Maintenance et gestion d'un parc d'imprimantes 3D.</li>
-                        <li>Gestion de projet : du besoin client à la livraison du prototype.</li>
-                    </ul>
-                </div>
+    function questionPrecedenteBase() {
+        if (currentQuestionBase > 0) {
+            currentQuestionBase--;
+            afficherQuestionBase();
+        }
+    }
 
-                <!-- Exp 3 -->
-                <div class="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow border-l-4 border-gray-300">
-                    <div class="flex flex-col md:flex-row justify-between md:items-center mb-4">
-                        <div>
-                            <h3 class="text-xl font-bold text-slate-900">Stage d'Observation</h3>
-                            <p class="text-blue-600 font-medium">Polyrepro - Sèvres</p>
-                        </div>
-                        <span class="text-sm font-semibold text-gray-400 bg-gray-100 px-3 py-1 rounded-full mt-2 md:mt-0 w-fit">Juin 2019</span>
-                    </div>
-                    <ul class="list-disc list-inside text-gray-600 space-y-1 marker:text-blue-600">
-                        <li>Observation des processus industriels de prototypage rapide.</li>
-                        <li>Découverte des technologies HP (SLA et SLS).</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Projects Section -->
-    <section id="projects" class="py-20 bg-slate-900 text-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="mb-16 text-white">
-                <h2 class="text-3xl font-bold section-title after:bg-blue-500">Réalisations Marquantes</h2>
-                <p class="mt-4 text-gray-400">Une sélection de mes projets techniques et créatifs.</p>
-            </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                
-                <!-- Project Card 1 -->
-                <div class="bg-slate-800 rounded-xl overflow-hidden hover-scale shadow-lg border border-slate-700 flex flex-col">
-                    <div class="h-48 overflow-hidden bg-gray-700 relative group">
-                        <!-- PLACEHOLDER: Image de la F1 (Untitled.jpg) -->
-                        <img src="Untitled.jpg" alt="Châssis Formula Student" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://placehold.co/600x400/334155/white?text=Formula+Student'">
-                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent opacity-60"></div>
-                    </div>
-                    <div class="p-6 flex-1 flex flex-col">
-                        <div class="mb-auto">
-                            <div class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">Automobile</div>
-                            <h3 class="text-xl font-bold mb-2">Troyes Racing Team</h3>
-                            <p class="text-gray-400 text-sm mb-4">
-                                Pôle Châssis. Conception et réalisation du châssis pour la Formula Student 2026. Travail collaboratif au sein d'une équipe de 50 membres.
-                            </p>
-                        </div>
-                        <div class="mt-4 pt-4 border-t border-slate-700 flex justify-between items-center">
-                            <span class="text-xs text-gray-500">En cours</span>
-                            <i class="fas fa-car text-gray-400"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Project Card 2 -->
-                <div class="bg-slate-800 rounded-xl overflow-hidden hover-scale shadow-lg border border-slate-700 flex flex-col">
-                    <div class="h-48 overflow-hidden bg-gray-700 relative group">
-                        <!-- PLACEHOLDER: Image Vue côté (vue coté.jpg) -->
-                        <img src="vue coté.jpg" alt="Projet 3D" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.src='https://placehold.co/600x400/334155/white?text=Conception+3D'">
-                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent opacity-60"></div>
-                    </div>
-                    <div class="p-6 flex-1 flex flex-col">
-                        <div class="mb-auto">
-                            <div class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">Innovation</div>
-                            <h3 class="text-xl font-bold mb-2">Prototype Bidet Amovible</h3>
-                            <p class="text-gray-400 text-sm mb-4">
-                                Projet complet : étude des besoins, design, choix des matériaux et techniques de fabrication. Travail d'équipe pluridisciplinaire.
-                            </p>
-                        </div>
-                        <div class="mt-4 pt-4 border-t border-slate-700 flex justify-between items-center">
-                            <span class="text-xs text-gray-500">2024</span>
-                            <i class="fas fa-tools text-gray-400"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Project Card 3 -->
-                <div class="bg-slate-800 rounded-xl overflow-hidden hover-scale shadow-lg border border-slate-700 flex flex-col">
-                    <div class="h-48 bg-gradient-to-br from-blue-900 to-slate-800 flex items-center justify-center relative group">
-                        <i class="fas fa-music text-6xl text-white/20 group-hover:text-white/40 transition-colors"></i>
-                    </div>
-                    <div class="p-6 flex-1 flex flex-col">
-                        <div class="mb-auto">
-                            <div class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">Audio & Acoustique</div>
-                            <h3 class="text-xl font-bold mb-2">Enceinte DIY Hi-Fi</h3>
-                            <p class="text-gray-400 text-sm mb-4">
-                                Gestion de projet individuel : recherche acoustique, autoformation, planification, prototypage et évaluation finale.
-                            </p>
-                        </div>
-                        <div class="mt-4 pt-4 border-t border-slate-700 flex justify-between items-center">
-                            <span class="text-xs text-gray-500">2024</span>
-                            <i class="fas fa-volume-up text-gray-400"></i>
-                        </div>
-                    </div>
-                </div>
-
-                 <!-- Project Card 4 (Design Continu) -->
-                 <div class="bg-slate-800 rounded-xl overflow-hidden hover-scale shadow-lg border border-slate-700 flex flex-col md:col-span-2 lg:col-span-3">
-                    <div class="p-8 flex flex-col md:flex-row gap-8 items-center">
-                        <div class="w-full md:w-1/3">
-                             <!-- PLACEHOLDER: Image Design Continu ou Trophée -->
-                             <div class="rounded-lg overflow-hidden h-64 bg-gray-700">
-                                 <img src="https://placehold.co/600x600/334155/white?text=Design+%26+Trophées" alt="Design 3D" class="w-full h-full object-cover">
-                             </div>
-                        </div>
-                        <div class="w-full md:w-2/3">
-                            <div class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">Design & Création</div>
-                            <h3 class="text-2xl font-bold mb-4">Design et Création 3D en Continu</h3>
-                            <p class="text-gray-400 mb-6">
-                                Conception et fabrication de pièces uniques pour divers événements et clients :
-                            </p>
-                            <div class="grid sm:grid-cols-2 gap-4">
-                                <div class="flex items-center gap-3 bg-slate-700/50 p-3 rounded-lg">
-                                    <i class="fas fa-trophy text-yellow-500"></i>
-                                    <span class="text-sm">Trophées Concours Éloquence UTT</span>
-                                </div>
-                                <div class="flex items-center gap-3 bg-slate-700/50 p-3 rounded-lg">
-                                    <i class="fas fa-award text-yellow-500"></i>
-                                    <span class="text-sm">Prix de l'inclusion L'Oréal</span>
-                                </div>
-                                <div class="flex items-center gap-3 bg-slate-700/50 p-3 rounded-lg">
-                                    <i class="fas fa-industry text-blue-400"></i>
-                                    <span class="text-sm">Chaîne de production pédagogique</span>
-                                </div>
-                                <div class="flex items-center gap-3 bg-slate-700/50 p-3 rounded-lg">
-                                    <i class="fas fa-palette text-pink-400"></i>
-                                    <span class="text-sm">Move Ops (Concours L'Oréal)</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- Skills Section -->
-    <section id="skills" class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="mb-16">
-                <h2 class="text-3xl font-bold text-slate-900 section-title">Compétences Techniques</h2>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-12">
-                <!-- Hard Skills -->
-                <div>
-                    <h3 class="text-xl font-bold mb-6 flex items-center text-slate-800">
-                        <span class="bg-blue-100 text-blue-600 p-2 rounded mr-3"><i class="fas fa-laptop-code"></i></span>
-                        Logiciels & Numérique
-                    </h3>
-                    <div class="space-y-6">
-                        <div>
-                            <div class="flex justify-between mb-1">
-                                <span class="font-medium text-gray-700">Blender (Design & Rendu)</span>
-                                <span class="text-sm text-gray-500">Avancé</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 90%"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between mb-1">
-                                <span class="font-medium text-gray-700">CAO (Creo, Catia, Fusion 360)</span>
-                                <span class="text-sm text-gray-500">Intermédiaire/Avancé</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 80%"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between mb-1">
-                                <span class="font-medium text-gray-700">Impression 3D (Cura, PrusaSlicer)</span>
-                                <span class="text-sm text-gray-500">Expert</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 95%"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between mb-1">
-                                <span class="font-medium text-gray-700">Suite Adobe (Lr, Ai)</span>
-                                <span class="text-sm text-gray-500">Intermédiaire</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 70%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Soft Skills -->
-                <div>
-                    <h3 class="text-xl font-bold mb-6 flex items-center text-slate-800">
-                        <span class="bg-indigo-100 text-indigo-600 p-2 rounded mr-3"><i class="fas fa-users"></i></span>
-                        Compétences Transverses
-                    </h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center hover:border-blue-400 transition-colors">
-                            <i class="fas fa-comments text-2xl text-gray-400 mb-2"></i>
-                            <p class="font-medium text-gray-800">Prise de parole</p>
-                        </div>
-                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center hover:border-blue-400 transition-colors">
-                            <i class="fas fa-people-carry text-2xl text-gray-400 mb-2"></i>
-                            <p class="font-medium text-gray-800">Travail d'équipe</p>
-                        </div>
-                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center hover:border-blue-400 transition-colors">
-                            <i class="fas fa-hourglass-half text-2xl text-gray-400 mb-2"></i>
-                            <p class="font-medium text-gray-800">Gestion du temps</p>
-                        </div>
-                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center hover:border-blue-400 transition-colors">
-                            <i class="fas fa-tasks text-2xl text-gray-400 mb-2"></i>
-                            <p class="font-medium text-gray-800">Gestion de projet</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact / Footer -->
-    <footer id="contact" class="bg-slate-900 text-white pt-20 pb-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-2 gap-12 items-center mb-16">
-                <div>
-                    <h2 class="text-3xl font-bold mb-6">Travaillons ensemble</h2>
-                    <p class="text-gray-400 mb-8">
-                        Je suis actuellement à la recherche d'un stage Assistant Ingénieur. Si mon profil vous intéresse, n'hésitez pas à me contacter.
-                    </p>
-                    <div class="space-y-4">
-                        <a href="mailto:thomas.debauge@utt.fr" class="flex items-center group">
-                            <span class="bg-blue-600 p-3 rounded-full group-hover:bg-blue-500 transition-colors">
-                                <i class="fas fa-envelope"></i>
-                            </span>
-                            <span class="ml-4 text-lg text-gray-300 group-hover:text-white transition-colors">thomas.debauge@utt.fr</span>
-                        </a>
-                        <div class="flex items-center group">
-                            <span class="bg-blue-600 p-3 rounded-full">
-                                <i class="fas fa-phone"></i>
-                            </span>
-                            <span class="ml-4 text-lg text-gray-300">+33 6 24 51 91 46</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-slate-800 p-8 rounded-2xl border border-slate-700 text-center">
-                    <h3 class="text-xl font-bold mb-6">Retrouvez-moi sur les réseaux</h3>
-                    <div class="flex justify-center gap-6">
-                        <a href="#" class="text-4xl text-gray-400 hover:text-white transition-colors hover:scale-110 transform duration-300"><i class="fab fa-linkedin"></i></a>
-                        <a href="#" class="text-4xl text-gray-400 hover:text-pink-500 transition-colors hover:scale-110 transform duration-300" title="@blenderyourdream"><i class="fab fa-instagram"></i></a>
-                    </div>
-                    <p class="mt-6 text-sm text-gray-500">
-                        Instagram : @blenderyourdream | @yourdreamin3D | @sbrphotographie
-                    </p>
-                </div>
-            </div>
-            
-            <div class="border-t border-slate-800 pt-8 text-center text-gray-500 text-sm">
-                <p>&copy; 2025 Thomas Debauge. Tous droits réservés. Site conçu en HTML/TailwindCSS.</p>
-            </div>
-        </div>
-    </footer>
+    window.addEventListener('load', function() {
+        genererQuestions();
+    });
+</script>
 
 </body>
 </html>
