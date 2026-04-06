@@ -14,9 +14,9 @@
       --text: #1a1916;
       --muted: #9b9690;
       --dot: #1a1916;
-      --shadow: 0 2px 16px rgba(0,0,0,0.06);
+      --shadow: 0 2px 20px rgba(0,0,0,0.07);
       --radius: 14px;
-      --die: 76px;
+      --die: 78px;
     }
 
     body {
@@ -36,9 +36,7 @@
 
     /* Controls */
     .controls {
-      display: flex;
-      align-items: center;
-      gap: 24px;
+      display: flex; align-items: center; gap: 24px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -49,16 +47,11 @@
     .count-label { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
     .stepper { display: flex; align-items: center; gap: 16px; }
     .stepper button {
-      width: 30px; height: 30px;
-      border-radius: 50%;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--text);
-      font-size: 1rem;
-      cursor: pointer;
+      width: 30px; height: 30px; border-radius: 50%;
+      border: 1px solid var(--border); background: var(--bg); color: var(--text);
+      font-size: 1rem; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      transition: background 0.12s;
-      user-select: none;
+      transition: background 0.12s; user-select: none;
     }
     .stepper button:hover:not(:disabled) { background: var(--border); }
     .stepper button:disabled { opacity: 0.28; cursor: not-allowed; }
@@ -66,18 +59,11 @@
 
     /* Roll button */
     .roll-btn {
-      background: var(--text);
-      color: var(--bg);
-      border: none;
-      border-radius: 10px;
-      padding: 15px 44px;
-      font-size: 0.95rem;
-      font-weight: 500;
-      letter-spacing: 0.025em;
-      cursor: pointer;
-      transition: opacity 0.15s, transform 0.1s;
-      margin-bottom: 44px;
-      user-select: none;
+      background: var(--text); color: var(--bg);
+      border: none; border-radius: 10px;
+      padding: 15px 44px; font-size: 0.95rem; font-weight: 500; letter-spacing: 0.025em;
+      cursor: pointer; transition: opacity 0.15s, transform 0.1s;
+      margin-bottom: 44px; user-select: none;
     }
     .roll-btn:hover { opacity: 0.82; }
     .roll-btn:active { transform: scale(0.97); }
@@ -85,105 +71,80 @@
 
     /* Dice area */
     .dice-area {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 16px;
-      min-height: calc(var(--die) + 16px);
+      display: flex; flex-wrap: wrap; justify-content: center;
+      gap: 18px;
+      min-height: calc(var(--die) + 18px);
       margin-bottom: 40px;
     }
 
-    /* Die shell */
+    /* Die shell — shake/blur are applied here via JS */
     .die {
-      width: var(--die);
-      height: var(--die);
+      width: var(--die); height: var(--die);
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 14px;
       box-shadow: var(--shadow);
       display: grid;
       padding: 10px;
-      position: relative;
-      overflow: hidden;
+      will-change: transform, filter;
     }
 
-    /* The inner content that scales */
-    .die-inner {
-      width: 100%;
-      height: 100%;
-      display: grid;
-      transform-origin: center;
+    /* Dot face layouts */
+    .die[data-v="1"] { grid-template-areas: ". . ." ". c ." ". . ."; }
+    .die[data-v="1"] .dot:nth-child(1) { grid-area: c; }
+
+    .die[data-v="2"] { grid-template-areas: ". . a" ". . ." "b . ."; }
+    .die[data-v="2"] .dot:nth-child(1) { grid-area: a; }
+    .die[data-v="2"] .dot:nth-child(2) { grid-area: b; }
+
+    .die[data-v="3"] { grid-template-areas: ". . a" ". c ." "b . ."; }
+    .die[data-v="3"] .dot:nth-child(1) { grid-area: a; }
+    .die[data-v="3"] .dot:nth-child(2) { grid-area: c; }
+    .die[data-v="3"] .dot:nth-child(3) { grid-area: b; }
+
+    .die[data-v="4"] { grid-template-areas: "a . b" ". . ." "c . d"; }
+    .die[data-v="4"] .dot:nth-child(1) { grid-area: a; }
+    .die[data-v="4"] .dot:nth-child(2) { grid-area: b; }
+    .die[data-v="4"] .dot:nth-child(3) { grid-area: c; }
+    .die[data-v="4"] .dot:nth-child(4) { grid-area: d; }
+
+    .die[data-v="5"] { grid-template-areas: "a . b" ". c ." "d . e"; }
+    .die[data-v="5"] .dot:nth-child(1) { grid-area: a; }
+    .die[data-v="5"] .dot:nth-child(2) { grid-area: b; }
+    .die[data-v="5"] .dot:nth-child(3) { grid-area: c; }
+    .die[data-v="5"] .dot:nth-child(4) { grid-area: d; }
+    .die[data-v="5"] .dot:nth-child(5) { grid-area: e; }
+
+    .die[data-v="6"] { grid-template-areas: "a . b" "c . d" "e . f"; }
+    .die[data-v="6"] .dot:nth-child(1) { grid-area: a; }
+    .die[data-v="6"] .dot:nth-child(2) { grid-area: b; }
+    .die[data-v="6"] .dot:nth-child(3) { grid-area: c; }
+    .die[data-v="6"] .dot:nth-child(4) { grid-area: d; }
+    .die[data-v="6"] .dot:nth-child(5) { grid-area: e; }
+    .die[data-v="6"] .dot:nth-child(6) { grid-area: f; }
+
+    .dot {
+      width: 9px; height: 9px;
+      background: var(--dot); border-radius: 50%;
+      margin: auto;
+      transition: transform 0.04s ease;
     }
 
-    /* Tick: quick scale pulse */
-    .die-inner.tick {
-      animation: tick-scale 0.12s ease-out;
-    }
-
-    /* Landing: bigger satisfying pop */
-    .die-inner.land {
-      animation: land-pop 0.35s cubic-bezier(0.22, 0.68, 0, 1.3);
-    }
-
-    @keyframes tick-scale {
+    /* Landing pop */
+    @keyframes land {
       0%   { transform: scale(1); }
-      45%  { transform: scale(1.18); }
+      35%  { transform: scale(1.22); }
+      62%  { transform: scale(0.92); }
+      82%  { transform: scale(1.06); }
       100% { transform: scale(1); }
     }
-
-    @keyframes land-pop {
-      0%   { transform: scale(1); }
-      35%  { transform: scale(1.28); }
-      65%  { transform: scale(0.93); }
-      100% { transform: scale(1); }
-    }
-
-    /* Dot layout — grid areas */
-    .dot { width: 9px; height: 9px; background: var(--dot); border-radius: 50%; margin: auto; }
-
-    .die-inner[data-v="1"] { grid-template-areas: ". . ." ". c ." ". . ."; }
-    .die-inner[data-v="1"] .dot:nth-child(1) { grid-area: c; }
-
-    .die-inner[data-v="2"] { grid-template-areas: ". . a" ". . ." "b . ."; }
-    .die-inner[data-v="2"] .dot:nth-child(1) { grid-area: a; }
-    .die-inner[data-v="2"] .dot:nth-child(2) { grid-area: b; }
-
-    .die-inner[data-v="3"] { grid-template-areas: ". . a" ". c ." "b . ."; }
-    .die-inner[data-v="3"] .dot:nth-child(1) { grid-area: a; }
-    .die-inner[data-v="3"] .dot:nth-child(2) { grid-area: c; }
-    .die-inner[data-v="3"] .dot:nth-child(3) { grid-area: b; }
-
-    .die-inner[data-v="4"] { grid-template-areas: "a . b" ". . ." "c . d"; }
-    .die-inner[data-v="4"] .dot:nth-child(1) { grid-area: a; }
-    .die-inner[data-v="4"] .dot:nth-child(2) { grid-area: b; }
-    .die-inner[data-v="4"] .dot:nth-child(3) { grid-area: c; }
-    .die-inner[data-v="4"] .dot:nth-child(4) { grid-area: d; }
-
-    .die-inner[data-v="5"] { grid-template-areas: "a . b" ". c ." "d . e"; }
-    .die-inner[data-v="5"] .dot:nth-child(1) { grid-area: a; }
-    .die-inner[data-v="5"] .dot:nth-child(2) { grid-area: b; }
-    .die-inner[data-v="5"] .dot:nth-child(3) { grid-area: c; }
-    .die-inner[data-v="5"] .dot:nth-child(4) { grid-area: d; }
-    .die-inner[data-v="5"] .dot:nth-child(5) { grid-area: e; }
-
-    .die-inner[data-v="6"] { grid-template-areas: "a . b" "c . d" "e . f"; }
-    .die-inner[data-v="6"] .dot:nth-child(1) { grid-area: a; }
-    .die-inner[data-v="6"] .dot:nth-child(2) { grid-area: b; }
-    .die-inner[data-v="6"] .dot:nth-child(3) { grid-area: c; }
-    .die-inner[data-v="6"] .dot:nth-child(4) { grid-area: d; }
-    .die-inner[data-v="6"] .dot:nth-child(5) { grid-area: e; }
-    .die-inner[data-v="6"] .dot:nth-child(6) { grid-area: f; }
+    .die.landed { animation: land 0.38s cubic-bezier(0.22, 0.68, 0, 1.2); }
 
     /* Score */
     .score-panel {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px 40px;
-      box-shadow: var(--shadow);
-      text-align: center;
-      margin-bottom: 44px;
-      transition: opacity 0.3s;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px 40px;
+      box-shadow: var(--shadow); text-align: center; margin-bottom: 44px;
     }
     .score-label { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
     #total-score { font-size: 2.8rem; font-weight: 700; letter-spacing: -0.04em; line-height: 1; }
@@ -194,15 +155,12 @@
     .history-list { display: flex; flex-direction: column; gap: 7px; }
     .h-item {
       display: flex; align-items: center;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 11px 18px;
-      font-size: 0.88rem;
-      animation: slide-in 0.22s ease;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 18px; font-size: 0.88rem;
+      animation: fadein 0.22s ease;
     }
-    @keyframes slide-in {
-      from { opacity: 0; transform: translateY(8px); }
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(6px); }
       to   { opacity: 1; transform: translateY(0); }
     }
     .h-num  { color: var(--muted); font-size: 0.75rem; min-width: 28px; }
@@ -212,16 +170,14 @@
 </head>
 <body>
 
-  <header>
-    <h1>Lancé de dés <span>·</span></h1>
-  </header>
+  <header><h1>Lancé de dés <span>·</span></h1></header>
 
   <div class="controls">
     <span class="count-label">Dés</span>
     <div class="stepper">
-      <button id="btn-min" onclick="step(-1)" aria-label="Moins">−</button>
+      <button id="btn-min" onclick="step(-1)">−</button>
       <span id="dice-count">2</span>
-      <button id="btn-max" onclick="step(+1)" aria-label="Plus">+</button>
+      <button id="btn-max" onclick="step(+1)">+</button>
     </div>
   </div>
 
@@ -241,7 +197,7 @@
 
 <script>
   const MIN = 1, MAX = 10;
-  let n = 2, idx = 0;
+  let n = 2, rollIdx = 0;
 
   function step(d) {
     n = Math.max(MIN, Math.min(MAX, n + d));
@@ -250,118 +206,124 @@
     document.getElementById('btn-max').disabled = n >= MAX;
   }
 
-  function setInner(inner, val) {
-    inner.dataset.v = val;
-    inner.innerHTML = Array.from({ length: val }, () => '<div class="dot"></div>').join('');
+  function setFace(die, v) {
+    die.dataset.v = v;
+    die.innerHTML = Array.from({ length: v }, () => '<div class="dot"></div>').join('');
   }
 
-  function triggerAnim(inner, cls) {
-    inner.classList.remove('tick', 'land');
-    // Force reflow so re-adding the class restarts the animation
-    void inner.offsetWidth;
-    inner.classList.add(cls);
-  }
+  // Smooth cubic ease-out
+  function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
 
-  function createDie() {
-    const die = document.createElement('div');
-    die.className = 'die';
-    const inner = document.createElement('div');
-    inner.className = 'die-inner';
-    die.appendChild(inner);
-    return { die, inner };
-  }
+  // Animate a single die: smooth shake + blur via rAF, face changes slow down naturally
+  function animateDie(die, finalVal, offsetMs, onDone) {
+    const duration = 1300 + offsetMs * 0.6 + Math.random() * 150;
+    // Face flip interval: goes from ~55ms → ~400ms as eased progress increases
+    const flipFast = 55, flipSlow = 420;
 
-  // Build a schedule of delays with exponential easing (fast → slow)
-  function buildSchedule(totalMs, startInterval, endInterval) {
-    const times = [];
-    let t = 0;
-    let interval = startInterval;
-    const growth = Math.pow(endInterval / startInterval, 1 / (totalMs / startInterval));
-    while (t < totalMs) {
-      times.push(Math.round(t));
-      t += interval;
-      interval = Math.min(interval * growth, endInterval);
-    }
-    return times;
-  }
+    let startTs = null;
+    let lastFlipElapsed = -999;
+    let lastVal = Math.ceil(Math.random() * 6);
+    let done = false;
 
-  function animateDie(inner, finalVal, delayOffset, onDone) {
-    // Each die gets a slightly different total duration for a staggered feel
-    const totalMs = 1100 + delayOffset * 60 + Math.random() * 200;
-    const schedule = buildSchedule(totalMs, 50, 320);
+    setFace(die, lastVal);
 
-    let last = 0;
-    schedule.forEach((t, i) => {
-      const isLast = i === schedule.length - 1;
-      setTimeout(() => {
-        let val;
-        if (isLast) {
-          val = finalVal;
-          setInner(inner, val);
-          triggerAnim(inner, 'land');
+    function frame(ts) {
+      if (!startTs) startTs = ts;
+      const raw = ts - startTs - offsetMs;
+
+      if (raw < 0) { requestAnimationFrame(frame); return; }
+
+      const t  = Math.min(raw / duration, 1);
+      const e  = easeOut(t);
+      const speed = 1 - e; // 1 = max speed, 0 = stopped
+
+      // ── Smooth sinusoidal shake (amplitude fades with speed) ──
+      const amp = speed * 6;
+      const sx  = Math.sin(raw * 0.055) * amp;
+      const sy  = Math.cos(raw * 0.071) * amp * 0.7;
+      const sr  = Math.sin(raw * 0.038) * amp * 0.4;
+      die.style.transform = `translate(${sx.toFixed(2)}px, ${sy.toFixed(2)}px) rotate(${sr.toFixed(2)}deg)`;
+
+      // ── Motion blur proportional to speed ──
+      die.style.filter = `blur(${(speed * 3.5).toFixed(2)}px)`;
+
+      // ── Face cycling ──
+      const flipInterval = flipFast + (flipSlow - flipFast) * e;
+      if (raw - lastFlipElapsed >= flipInterval) {
+        lastFlipElapsed = raw;
+
+        if (t >= 1 && !done) {
+          done = true;
+          die.style.transform = '';
+          die.style.filter = '';
+          setFace(die, finalVal);
+          die.classList.remove('landed');
+          void die.offsetWidth;
+          die.classList.add('landed');
           onDone();
-        } else {
-          // Pick a different value from the previous one for visible change
-          do { val = Math.ceil(Math.random() * 6); } while (val === last);
-          last = val;
-          setInner(inner, val);
-          triggerAnim(inner, 'tick');
+          return;
         }
-      }, delayOffset * 40 + t);
-    });
+
+        // Pick a different face than current
+        let v;
+        do { v = Math.ceil(Math.random() * 6); } while (v === lastVal);
+        lastVal = v;
+        setFace(die, v);
+      }
+
+      if (!done) requestAnimationFrame(frame);
+    }
+
+    requestAnimationFrame(frame);
   }
 
   function roll() {
     const btn = document.getElementById('roll-btn');
     btn.classList.add('rolling');
     btn.textContent = '…';
-
-    // Hide score during roll
-    const scorePanel = document.getElementById('score-panel');
-    scorePanel.style.visibility = 'hidden';
+    document.getElementById('score-panel').style.visibility = 'hidden';
 
     const area = document.getElementById('dice-area');
     area.innerHTML = '';
 
     const vals = Array.from({ length: n }, () => Math.ceil(Math.random() * 6));
-    let done = 0;
+    let settled = 0;
 
     vals.forEach((v, i) => {
-      const { die, inner } = createDie();
-      setInner(inner, 1); // start visible
+      const die = document.createElement('div');
+      die.className = 'die';
       area.appendChild(die);
+      // Stagger: each die starts 60ms after the previous
+      animateDie(die, v, i * 60, () => {
+        settled++;
+        if (settled < n) return;
 
-      animateDie(inner, v, i, () => {
-        done++;
-        if (done === n) {
-          // All dice landed
-          const total = vals.reduce((a, b) => a + b, 0);
-          scorePanel.style.visibility = 'visible';
-          document.getElementById('total-score').textContent = total;
+        // All done
+        const total = vals.reduce((a, b) => a + b, 0);
+        const panel = document.getElementById('score-panel');
+        panel.style.visibility = 'visible';
+        document.getElementById('total-score').textContent = total;
 
-          idx++;
-          const histEl = document.getElementById('history');
-          histEl.style.display = 'block';
-          const list = document.getElementById('history-list');
-          const row = document.createElement('div');
-          row.className = 'h-item';
-          row.innerHTML = `
-            <span class="h-num">#${idx}</span>
-            <span class="h-vals">${vals.join(' · ')}</span>
-            <span class="h-sum">${total}</span>
-          `;
-          list.prepend(row);
-          while (list.children.length > 12) list.removeChild(list.lastChild);
+        rollIdx++;
+        const histEl = document.getElementById('history');
+        histEl.style.display = 'block';
+        const list = document.getElementById('history-list');
+        const row = document.createElement('div');
+        row.className = 'h-item';
+        row.innerHTML = `
+          <span class="h-num">#${rollIdx}</span>
+          <span class="h-vals">${vals.join(' · ')}</span>
+          <span class="h-sum">${total}</span>`;
+        list.prepend(row);
+        while (list.children.length > 12) list.removeChild(list.lastChild);
 
-          btn.classList.remove('rolling');
-          btn.textContent = 'Lancer';
-        }
+        btn.classList.remove('rolling');
+        btn.textContent = 'Lancer';
       });
     });
   }
 
   step(0);
 </script>
-
 </body>
 </html>
