@@ -16,7 +16,7 @@
       --dot: #1a1916;
       --shadow: 0 2px 16px rgba(0,0,0,0.06);
       --radius: 14px;
-      --die-size: 72px;
+      --die: 76px;
     }
 
     body {
@@ -34,7 +34,7 @@
     h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; }
     h1 span { color: var(--muted); font-weight: 400; }
 
-    /* ── Controls ── */
+    /* Controls */
     .controls {
       display: flex;
       align-items: center;
@@ -46,16 +46,8 @@
       box-shadow: var(--shadow);
       margin-bottom: 28px;
     }
-
-    .count-label {
-      font-size: 0.78rem;
-      color: var(--muted);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-
+    .count-label { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
     .stepper { display: flex; align-items: center; gap: 16px; }
-
     .stepper button {
       width: 30px; height: 30px;
       border-radius: 50%;
@@ -70,10 +62,9 @@
     }
     .stepper button:hover:not(:disabled) { background: var(--border); }
     .stepper button:disabled { opacity: 0.28; cursor: not-allowed; }
-
     #dice-count { font-size: 1.5rem; font-weight: 600; min-width: 26px; text-align: center; }
 
-    /* ── Roll button ── */
+    /* Roll button */
     .roll-btn {
       background: var(--text);
       color: var(--bg);
@@ -90,114 +81,100 @@
     }
     .roll-btn:hover { opacity: 0.82; }
     .roll-btn:active { transform: scale(0.97); }
-    .roll-btn.rolling { opacity: 0.5; pointer-events: none; }
+    .roll-btn.rolling { opacity: 0.45; pointer-events: none; }
 
-    /* ── Dice area ── */
+    /* Dice area */
     .dice-area {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 20px;
-      min-height: calc(var(--die-size) + 20px);
+      gap: 16px;
+      min-height: calc(var(--die) + 16px);
       margin-bottom: 40px;
-      perspective: 600px;
     }
 
-    /* ── 3D Die wrapper ── */
-    .die-scene {
-      width: var(--die-size);
-      height: var(--die-size);
-      perspective: 400px;
-    }
-
-    .die-3d {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      transform-style: preserve-3d;
-    }
-
-    /* Spin animation: random via JS-set custom property */
-    .die-3d.spinning {
-      animation: spin3d var(--spin-dur, 0.6s) cubic-bezier(0.22, 0.68, 0, 1.1) forwards;
-    }
-
-    @keyframes spin3d {
-      0%   { transform: rotateX(0deg)   rotateY(0deg)   rotateZ(0deg) scale3d(0.6,0.6,0.6); opacity: 0.3; }
-      30%  { opacity: 1; }
-      60%  { transform: rotateX(var(--rx, 360deg)) rotateY(var(--ry, 540deg)) rotateZ(var(--rz, 90deg)) scale3d(1.08,1.08,1.08); }
-      100% { transform: rotateX(var(--rx, 360deg)) rotateY(var(--ry, 540deg)) rotateZ(var(--rz, 90deg)) scale3d(1,1,1); opacity: 1; }
-    }
-
-    /* Six faces of the cube */
-    .face {
-      position: absolute;
-      width: var(--die-size);
-      height: var(--die-size);
+    /* Die shell */
+    .die {
+      width: var(--die);
+      height: var(--die);
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 14px;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6), var(--shadow);
+      box-shadow: var(--shadow);
       display: grid;
       padding: 10px;
-      backface-visibility: hidden;
+      position: relative;
+      overflow: hidden;
     }
 
-    .face-front  { transform: translateZ(calc(var(--die-size) / 2)); }
-    .face-back   { transform: rotateY(180deg) translateZ(calc(var(--die-size) / 2)); }
-    .face-right  { transform: rotateY(90deg)  translateZ(calc(var(--die-size) / 2)); }
-    .face-left   { transform: rotateY(-90deg) translateZ(calc(var(--die-size) / 2)); }
-    .face-top    { transform: rotateX(90deg)  translateZ(calc(var(--die-size) / 2)); }
-    .face-bottom { transform: rotateX(-90deg) translateZ(calc(var(--die-size) / 2)); }
-
-    /* Dot layout using CSS grid areas */
-    .dot {
-      width: 9px; height: 9px;
-      background: var(--dot);
-      border-radius: 50%;
-      margin: auto;
+    /* The inner content that scales */
+    .die-inner {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      transform-origin: center;
     }
 
-    /* face-1 */
-    .f1 { grid-template-areas: ". . ." ". c ." ". . ."; }
-    .f1 .dot:nth-child(1) { grid-area: c; }
+    /* Tick: quick scale pulse */
+    .die-inner.tick {
+      animation: tick-scale 0.12s ease-out;
+    }
 
-    /* face-2 */
-    .f2 { grid-template-areas: ". . a" ". . ." "b . ."; }
-    .f2 .dot:nth-child(1) { grid-area: a; }
-    .f2 .dot:nth-child(2) { grid-area: b; }
+    /* Landing: bigger satisfying pop */
+    .die-inner.land {
+      animation: land-pop 0.35s cubic-bezier(0.22, 0.68, 0, 1.3);
+    }
 
-    /* face-3 */
-    .f3 { grid-template-areas: ". . a" ". c ." "b . ."; }
-    .f3 .dot:nth-child(1) { grid-area: a; }
-    .f3 .dot:nth-child(2) { grid-area: c; }
-    .f3 .dot:nth-child(3) { grid-area: b; }
+    @keyframes tick-scale {
+      0%   { transform: scale(1); }
+      45%  { transform: scale(1.18); }
+      100% { transform: scale(1); }
+    }
 
-    /* face-4 */
-    .f4 { grid-template-areas: "a . b" ". . ." "c . d"; }
-    .f4 .dot:nth-child(1) { grid-area: a; }
-    .f4 .dot:nth-child(2) { grid-area: b; }
-    .f4 .dot:nth-child(3) { grid-area: c; }
-    .f4 .dot:nth-child(4) { grid-area: d; }
+    @keyframes land-pop {
+      0%   { transform: scale(1); }
+      35%  { transform: scale(1.28); }
+      65%  { transform: scale(0.93); }
+      100% { transform: scale(1); }
+    }
 
-    /* face-5 */
-    .f5 { grid-template-areas: "a . b" ". c ." "d . e"; }
-    .f5 .dot:nth-child(1) { grid-area: a; }
-    .f5 .dot:nth-child(2) { grid-area: b; }
-    .f5 .dot:nth-child(3) { grid-area: c; }
-    .f5 .dot:nth-child(4) { grid-area: d; }
-    .f5 .dot:nth-child(5) { grid-area: e; }
+    /* Dot layout — grid areas */
+    .dot { width: 9px; height: 9px; background: var(--dot); border-radius: 50%; margin: auto; }
 
-    /* face-6 */
-    .f6 { grid-template-areas: "a . b" "c . d" "e . f"; }
-    .f6 .dot:nth-child(1) { grid-area: a; }
-    .f6 .dot:nth-child(2) { grid-area: b; }
-    .f6 .dot:nth-child(3) { grid-area: c; }
-    .f6 .dot:nth-child(4) { grid-area: d; }
-    .f6 .dot:nth-child(5) { grid-area: e; }
-    .f6 .dot:nth-child(6) { grid-area: f; }
+    .die-inner[data-v="1"] { grid-template-areas: ". . ." ". c ." ". . ."; }
+    .die-inner[data-v="1"] .dot:nth-child(1) { grid-area: c; }
 
-    /* ── Score ── */
+    .die-inner[data-v="2"] { grid-template-areas: ". . a" ". . ." "b . ."; }
+    .die-inner[data-v="2"] .dot:nth-child(1) { grid-area: a; }
+    .die-inner[data-v="2"] .dot:nth-child(2) { grid-area: b; }
+
+    .die-inner[data-v="3"] { grid-template-areas: ". . a" ". c ." "b . ."; }
+    .die-inner[data-v="3"] .dot:nth-child(1) { grid-area: a; }
+    .die-inner[data-v="3"] .dot:nth-child(2) { grid-area: c; }
+    .die-inner[data-v="3"] .dot:nth-child(3) { grid-area: b; }
+
+    .die-inner[data-v="4"] { grid-template-areas: "a . b" ". . ." "c . d"; }
+    .die-inner[data-v="4"] .dot:nth-child(1) { grid-area: a; }
+    .die-inner[data-v="4"] .dot:nth-child(2) { grid-area: b; }
+    .die-inner[data-v="4"] .dot:nth-child(3) { grid-area: c; }
+    .die-inner[data-v="4"] .dot:nth-child(4) { grid-area: d; }
+
+    .die-inner[data-v="5"] { grid-template-areas: "a . b" ". c ." "d . e"; }
+    .die-inner[data-v="5"] .dot:nth-child(1) { grid-area: a; }
+    .die-inner[data-v="5"] .dot:nth-child(2) { grid-area: b; }
+    .die-inner[data-v="5"] .dot:nth-child(3) { grid-area: c; }
+    .die-inner[data-v="5"] .dot:nth-child(4) { grid-area: d; }
+    .die-inner[data-v="5"] .dot:nth-child(5) { grid-area: e; }
+
+    .die-inner[data-v="6"] { grid-template-areas: "a . b" "c . d" "e . f"; }
+    .die-inner[data-v="6"] .dot:nth-child(1) { grid-area: a; }
+    .die-inner[data-v="6"] .dot:nth-child(2) { grid-area: b; }
+    .die-inner[data-v="6"] .dot:nth-child(3) { grid-area: c; }
+    .die-inner[data-v="6"] .dot:nth-child(4) { grid-area: d; }
+    .die-inner[data-v="6"] .dot:nth-child(5) { grid-area: e; }
+    .die-inner[data-v="6"] .dot:nth-child(6) { grid-area: f; }
+
+    /* Score */
     .score-panel {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -206,18 +183,17 @@
       box-shadow: var(--shadow);
       text-align: center;
       margin-bottom: 44px;
+      transition: opacity 0.3s;
     }
     .score-label { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
     #total-score { font-size: 2.8rem; font-weight: 700; letter-spacing: -0.04em; line-height: 1; }
 
-    /* ── History ── */
+    /* History */
     .history { width: 100%; max-width: 400px; }
     .history-title { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; text-align: center; margin-bottom: 12px; }
     .history-list { display: flex; flex-direction: column; gap: 7px; }
-
     .h-item {
-      display: flex;
-      align-items: center;
+      display: flex; align-items: center;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 10px;
@@ -267,20 +243,6 @@
   const MIN = 1, MAX = 10;
   let n = 2, idx = 0;
 
-  // Opposite faces on a standard die
-  const OPPOSITE = { 1:6, 2:5, 3:4, 4:3, 5:2, 6:1 };
-
-  // Final rotation to show each face on the front
-  // (rotateX, rotateY) so the front face shows the desired value
-  const FACE_ROT = {
-    1: [0,   0],
-    2: [0,   -90],
-    3: [-90, 0],
-    4: [90,  0],
-    5: [0,   90],
-    6: [0,   180],
-  };
-
   function step(d) {
     n = Math.max(MIN, Math.min(MAX, n + d));
     document.getElementById('dice-count').textContent = n;
@@ -288,53 +250,65 @@
     document.getElementById('btn-max').disabled = n >= MAX;
   }
 
-  function dots(count) {
-    return Array.from({ length: count }, () => '<div class="dot"></div>').join('');
+  function setInner(inner, val) {
+    inner.dataset.v = val;
+    inner.innerHTML = Array.from({ length: val }, () => '<div class="dot"></div>').join('');
   }
 
-  function makeDie3D(value) {
-    const scene = document.createElement('div');
-    scene.className = 'die-scene';
+  function triggerAnim(inner, cls) {
+    inner.classList.remove('tick', 'land');
+    // Force reflow so re-adding the class restarts the animation
+    void inner.offsetWidth;
+    inner.classList.add(cls);
+  }
 
-    const cube = document.createElement('div');
-    cube.className = 'die-3d';
+  function createDie() {
+    const die = document.createElement('div');
+    die.className = 'die';
+    const inner = document.createElement('div');
+    inner.className = 'die-inner';
+    die.appendChild(inner);
+    return { die, inner };
+  }
 
-    // Extra random full rotations for drama (multiples of 360 so face is correct)
-    const extraX = (Math.floor(Math.random() * 3) + 1) * 360;
-    const extraY = (Math.floor(Math.random() * 3) + 1) * 360;
-    const extraZ = (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 2)) * 180;
+  // Build a schedule of delays with exponential easing (fast → slow)
+  function buildSchedule(totalMs, startInterval, endInterval) {
+    const times = [];
+    let t = 0;
+    let interval = startInterval;
+    const growth = Math.pow(endInterval / startInterval, 1 / (totalMs / startInterval));
+    while (t < totalMs) {
+      times.push(Math.round(t));
+      t += interval;
+      interval = Math.min(interval * growth, endInterval);
+    }
+    return times;
+  }
 
-    const [baseX, baseY] = FACE_ROT[value];
-    const finalX = baseX + extraX;
-    const finalY = baseY + extraY;
-    const finalZ = extraZ;
-    const dur = 0.55 + Math.random() * 0.25;
+  function animateDie(inner, finalVal, delayOffset, onDone) {
+    // Each die gets a slightly different total duration for a staggered feel
+    const totalMs = 1100 + delayOffset * 60 + Math.random() * 200;
+    const schedule = buildSchedule(totalMs, 50, 320);
 
-    cube.style.setProperty('--rx', finalX + 'deg');
-    cube.style.setProperty('--ry', finalY + 'deg');
-    cube.style.setProperty('--rz', finalZ + 'deg');
-    cube.style.setProperty('--spin-dur', dur + 's');
-
-    // Standard die layout: front=value, back=opposite, right=5, left=2, top=4, bottom=3
-    // We just put all 6 faces with their values
-    const faces = [
-      { cls: 'face-front',  val: value },
-      { cls: 'face-back',   val: OPPOSITE[value] },
-      { cls: 'face-right',  val: 5 },
-      { cls: 'face-left',   val: 2 },
-      { cls: 'face-top',    val: 4 },
-      { cls: 'face-bottom', val: 3 },
-    ];
-
-    faces.forEach(({ cls, val }) => {
-      const face = document.createElement('div');
-      face.className = `face ${cls} f${val}`;
-      face.innerHTML = dots(val);
-      cube.appendChild(face);
+    let last = 0;
+    schedule.forEach((t, i) => {
+      const isLast = i === schedule.length - 1;
+      setTimeout(() => {
+        let val;
+        if (isLast) {
+          val = finalVal;
+          setInner(inner, val);
+          triggerAnim(inner, 'land');
+          onDone();
+        } else {
+          // Pick a different value from the previous one for visible change
+          do { val = Math.ceil(Math.random() * 6); } while (val === last);
+          last = val;
+          setInner(inner, val);
+          triggerAnim(inner, 'tick');
+        }
+      }, delayOffset * 40 + t);
     });
-
-    scene.appendChild(cube);
-    return { scene, cube };
   }
 
   function roll() {
@@ -342,48 +316,48 @@
     btn.classList.add('rolling');
     btn.textContent = '…';
 
+    // Hide score during roll
+    const scorePanel = document.getElementById('score-panel');
+    scorePanel.style.visibility = 'hidden';
+
     const area = document.getElementById('dice-area');
     area.innerHTML = '';
 
     const vals = Array.from({ length: n }, () => Math.ceil(Math.random() * 6));
-    let maxDur = 0;
+    let done = 0;
 
     vals.forEach((v, i) => {
-      const { scene, cube } = makeDie3D(v);
-      area.appendChild(scene);
+      const { die, inner } = createDie();
+      setInner(inner, 1); // start visible
+      area.appendChild(die);
 
-      // Stagger start
-      const delay = i * 70;
-      const dur = parseFloat(cube.style.getPropertyValue('--spin-dur'));
-      maxDur = Math.max(maxDur, delay + dur * 1000);
+      animateDie(inner, v, i, () => {
+        done++;
+        if (done === n) {
+          // All dice landed
+          const total = vals.reduce((a, b) => a + b, 0);
+          scorePanel.style.visibility = 'visible';
+          document.getElementById('total-score').textContent = total;
 
-      setTimeout(() => cube.classList.add('spinning'), delay);
+          idx++;
+          const histEl = document.getElementById('history');
+          histEl.style.display = 'block';
+          const list = document.getElementById('history-list');
+          const row = document.createElement('div');
+          row.className = 'h-item';
+          row.innerHTML = `
+            <span class="h-num">#${idx}</span>
+            <span class="h-vals">${vals.join(' · ')}</span>
+            <span class="h-sum">${total}</span>
+          `;
+          list.prepend(row);
+          while (list.children.length > 12) list.removeChild(list.lastChild);
+
+          btn.classList.remove('rolling');
+          btn.textContent = 'Lancer';
+        }
+      });
     });
-
-    setTimeout(() => {
-      const total = vals.reduce((a, b) => a + b, 0);
-      const scorePanel = document.getElementById('score-panel');
-      scorePanel.style.visibility = 'visible';
-      document.getElementById('total-score').textContent = total;
-
-      idx++;
-      const histEl = document.getElementById('history');
-      histEl.style.display = 'block';
-      const list = document.getElementById('history-list');
-
-      const row = document.createElement('div');
-      row.className = 'h-item';
-      row.innerHTML = `
-        <span class="h-num">#${idx}</span>
-        <span class="h-vals">${vals.join(' · ')}</span>
-        <span class="h-sum">${total}</span>
-      `;
-      list.prepend(row);
-      while (list.children.length > 12) list.removeChild(list.lastChild);
-
-      btn.classList.remove('rolling');
-      btn.textContent = 'Lancer';
-    }, maxDur + 80);
   }
 
   step(0);
