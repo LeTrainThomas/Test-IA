@@ -375,6 +375,50 @@
     }
     .proj-card:hover .proj-cta-arrow { transform: translateX(3px); }
 
+    /* ── MODAL GALLERY ── */
+    .modal-gallery {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .modal-gallery-item {
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      cursor: zoom-in;
+      aspect-ratio: 4/3;
+      background: var(--bg-2);
+    }
+    .modal-gallery-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .3s var(--ease);
+    }
+    .modal-gallery-item:hover img { transform: scale(1.04); }
+    .modal-gallery-caption {
+      font-size: 0.7rem;
+      color: var(--ink-3);
+      text-align: center;
+      margin-top: 5px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .lightbox {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,.88);
+      display: flex; align-items: center; justify-content: center;
+      cursor: zoom-out;
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s;
+    }
+    .lightbox.open { opacity: 1; pointer-events: all; }
+    .lightbox img {
+      max-width: 90vw; max-height: 88vh;
+      border-radius: 10px;
+      box-shadow: 0 40px 80px rgba(0,0,0,.5);
+    }
+
     /* ── MODAL ── */
     .modal-overlay {
       position: fixed; inset: 0; z-index: 200;
@@ -1289,6 +1333,19 @@
         </div>
       </div>
 
+      <div class="proj-card reveal" style="transition-delay:.26s; grid-column: 1 / -1" onclick="openModal('f1lattice')">
+        <div class="proj-accent-bar"></div>
+        <div class="proj-inner">
+          <span class="proj-cat">CAO · Structure lattice · Fabrication additive</span>
+          <div class="proj-name">Pièce F1 en structure lattice</div>
+          <div class="proj-period">2024 – 2025</div>
+          <div class="proj-excerpt">Conception d'une pièce inspirée de la Formule 1 en structure lattice — optimisation topologique alliant légèreté extrême et résistance mécanique.</div>
+        </div>
+        <div class="proj-footer">
+          <span class="proj-cta">Voir le détail <span class="proj-cta-arrow">&rarr;</span></span>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -1739,11 +1796,37 @@
       context: "Engagement associatif au sein du club photographie de l'UTT. Rôle orienté organisation et coordination, avec une pratique régulière de la photo lors d'évènements étudiants.",
       missions: ["Coordination d'équipes de photographes pour la couverture d'évènements UTT","Organisation d'évènements photo (expositions, sorties thématiques)","Gestion et entretien du matériel photographique","Post-traitement et diffusion des photos"],
       skills: ['Photographie','Organisation','Gestion matériel','Travail en équipe','Post-traitement']
+    },
+    f1lattice: {
+      tag: 'CAO · Structure lattice · Fabrication additive',
+      title: 'Pièce F1 en structure lattice',
+      period: '2024 – 2025',
+      context: "Conception d'une pièce inspirée des monoplaces de Formule 1, intégrant une structure lattice interne pour maximiser le ratio résistance/masse. Ce type d'architecture, utilisé en aéronautique et en F1, permet d'alléger drastiquement une pièce tout en conservant ses propriétés mécaniques.",
+      missions: ["Modélisation CAO de la géométrie extérieure","Génération et optimisation de la structure lattice interne","Analyse des contraintes mécaniques et ajustement de la densité du lattice","Préparation et fabrication par impression 3D FDM","Validation visuelle et dimensionnelle de la pièce finale"],
+      skills: ['CAO','Lattice','Impression 3D','Optimisation topologique','FDM','Design'],
+      images: [
+        { src: 'F1-vue-face-grand-angle.png', caption: 'Vue face — grand angle' },
+        { src: 'F1-vue-cote.png', caption: 'Vue de côté' },
+        { src: 'F1-vue-dessus.png', caption: 'Vue de dessus' }
+      ]
     }
   };
 
   function openModal(id) {
     const d = modals[id]; if (!d) return;
+    const galleryHTML = d.images ? `
+      <div class="modal-section-label">Vues du projet</div>
+      <div class="modal-gallery">
+        ${d.images.map(img => `
+          <div>
+            <div class="modal-gallery-item" onclick="openLightbox('${img.src}')">
+              <img src="${img.src}" alt="${img.caption}" loading="lazy">
+            </div>
+            <div class="modal-gallery-caption">${img.caption}</div>
+          </div>
+        `).join('')}
+      </div>
+    ` : '';
     document.getElementById('modal-content').innerHTML = `
       <div class="modal-accent"></div>
       <div class="modal-tag">${d.tag}</div>
@@ -1751,6 +1834,7 @@
       <div class="modal-period">${d.period}</div>
       <div class="modal-section-label">Contexte</div>
       <p class="modal-text">${d.context}</p>
+      ${galleryHTML}
       <div class="modal-section-label">Missions &amp; réalisations</div>
       <ul class="modal-list">${d.missions.map(m => `<li>${m}</li>`).join('')}</ul>
       <div class="modal-section-label">Compétences mobilisées</div>
@@ -1758,6 +1842,20 @@
     `;
     document.getElementById('modal-overlay').classList.add('open');
     document.body.style.overflow = 'hidden';
+  }
+
+  function openLightbox(src) {
+    let lb = document.getElementById('lightbox');
+    if (!lb) {
+      lb = document.createElement('div');
+      lb.id = 'lightbox';
+      lb.className = 'lightbox';
+      lb.innerHTML = '<img id="lightbox-img">';
+      lb.addEventListener('click', () => lb.classList.remove('open'));
+      document.body.appendChild(lb);
+    }
+    document.getElementById('lightbox-img').src = src;
+    lb.classList.add('open');
   }
   function closeModal() {
     document.getElementById('modal-overlay').classList.remove('open');
